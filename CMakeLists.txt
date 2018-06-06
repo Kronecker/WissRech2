@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.8)
 project(WissRech2)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11 -msse4 ")
+set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES main.cpp)
-add_executable(WissRech1 ${SOURCE_FILES})
+set(SOURCE_FILES Task4/main.cpp)
+add_executable(WissRech2 ${SOURCE_FILES})
