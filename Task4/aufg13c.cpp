@@ -52,7 +52,7 @@ flouble* jacobiIterCuda_1Core_CPU(int n, flouble *cudaF, flouble valBoundary, in
     cudaMalloc(&cuda_lastIterSol,sizeof(flouble)*nn);;
 
     initSolutionVectors_CUDA <<<n,n>>> (cuda_actualIteration, valBoundary);
-
+  // a
     flouble tol=0.0001;
     int iteration=0;
     flouble resi=tol+1;
