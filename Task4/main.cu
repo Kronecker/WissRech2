@@ -217,7 +217,7 @@ flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* num
         jacoboIteration_CUDA <<<n,n>>>(cuda_lastIterSol,cuda_actualIteration,n,valSubDiag,valMainDiag,cudaF);
 
         if(iteration%step==0) {
-            calculateResidual_CUDA <<<n,n>>>(cuda_actualIteration, cuda_lastIterSol, n, resiCuda);
+            calculateResidual_CUDA <<<n,n>>>(cuda_actualIteration, cuda_lastIterSol, resiCuda);
             cudaMemcpy(&resi,resiCuda,sizeof(flouble),cudaMemcpyDeviceToHost);
             cout<<iteration*2<<": "<<resi<<endl;
             if(resi<tol) {
@@ -299,7 +299,7 @@ __global__ void calculateResidual_CUDA(float *a, float *b, float *c) {
     }
 }
 
-__global__ void calculateResidual_CUDA(double *a, double *b,int n, double *c) {
+__global__ void calculateResidual_CUDA(double *a, double *b, double *c) {
     __shared__ double se[1024];
 
     int tid=threadId.x;
