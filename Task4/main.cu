@@ -19,7 +19,7 @@ flouble* jacobiIter(int n, flouble *f, flouble valBoundary, int* numberOfIterati
 void aufg13b();
 flouble* jacobiIterCuda_CPU(int n, flouble *f, flouble valBoundary, int* numberOfIterations, flouble h);
 __global__ void initMatrixRightHandSideCuda_CUDA(flouble h, flouble* matrix);
-__global__ void cuda_initSolutionVectors (flouble *actualIteration, flouble valBoundary)
+__global__ void cuda_initSolutionVectors (flouble *actualIteration, flouble valBoundary);
 
 
 void aufg13c();
@@ -180,7 +180,7 @@ __global__ void initMatrixRightHandSideCuda_CUDA(flouble h, flouble* matrix) {
 
 
 
-flouble* jacobiIterCuda_CPU(int n, flouble *f, flouble valBoundary, int* numberOfIterations, flouble h) {
+flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* numberOfIterations, flouble h) {
 
     int nn=n*n;
     flouble* actualIteration=new flouble[nn]();
@@ -188,35 +188,28 @@ flouble* jacobiIterCuda_CPU(int n, flouble *f, flouble valBoundary, int* numberO
 
     flouble *cuda_actualIteration, *cuda_lastIterSol;
     cudaMalloc(&cuda_actualIteration,sizeof(flouble)*nn);;
-    cudaMemset(cuda_actualIteration, 0, nn*sizeof(flouble));
     cudaMalloc(&cuda_lastIterSol,sizeof(flouble)*nn);;
 
     cuda_initSolutionVectors<<<n,n>>> (cuda_actualIteration, valBoundary);
 
-    cudaMemCopy(actualIteration,cuda_actualIteration,n*sizeof(flouble),cudaMemcpyDeviceToHost);
-//
-//    flouble tol=0.0001;
-//    int iteration=0;
-//    flouble resi=tol+1;
-//    int step=100;
-//
-//    flouble hsquare=h*h;
-//    flouble valSubDiag=-1/hsquare;
-//    flouble valMainDiag=4/hsquare;
-//
-//
-//
-//
-//
-//
-//    int nm1=n-1;
-//    int index;
-//    while(iteration<MAXITERATIONS&&resi>tol) {
-//        // consecutive blocks
-//
-//
-//
-//
+    cudaMemcpy(actualIteration,cuda_actualIteration,nn*sizeof(flouble),cudaMemcpyDeviceToHost);
+
+    flouble tol=0.0001;
+    int iteration=0;
+    flouble resi=tol+1;
+    int step=100;
+
+    flouble hsquare=h*h;
+    flouble valSubDiag=-1/hsquare;
+    flouble valMainDiag=4/hsquare;
+
+
+    while(iteration<100) {
+        // consecutive blocks
+
+        cuda_jacoboIteration<<<n,n>>>(cuda_actualIteration,cuda_lastIterSol,n,valSubDiag,valMainDiag,cudaF);
+        cuda_jacoboIteration<<<n,n>>>(cuda_lastIterSol,cuda_actualIteration,n,valSubDiag,valMainDiag,cudaF);
+
 //        if (!(iteration % step)) {
 //            resi=0;
 //            for(int i=0;i<n*n;i++) {
@@ -224,18 +217,14 @@ flouble* jacobiIterCuda_CPU(int n, flouble *f, flouble valBoundary, int* numberO
 //            }
 //            //   std::cout << iteration <<": "<< resi<< std::endl;
 //        }
-//
-//
-//        temp=lastIterSol;
-//        lastIterSol=actualIteration;
-//        actualIteration=temp;
-//        iteration++;
-//
-//
-//    }
-//    std::cout << "Calculation finished after "<<iteration<<" Iterations.(%"<<step<<")"<<std::endl;
-//    *numberOfIterations=iteration;
-//
+
+        iteration++;iteration++;
+
+
+    }
+    std::cout << "Calculation finished after "<<iteration<<" Iterations.(%"<<step<<")"<<std::endl;
+    *numberOfIterations=iteration;
+
 
     return actualIteration;
 
@@ -260,19 +249,20 @@ __global__ void cuda_initSolutionVectors (flouble *actualIteration, flouble valB
 
 
 __global__ void cuda_jacoboIteration (flouble* actualIteration,flouble*  lastIterSol,int n,flouble valSubDiag,flouble  valMainDiag, flouble* f ) {
-/*    int index;  //index=k*n+i;
+    int index;  //index=k*n+i;
     int tid=threadIdx.x;
     int bid=blockIdx.x;
     int bdim=blockDim.x;
 
-    for(int k=1;k<nm1;k++) { // iterate through blocks
-
-        for(int i=1;i<nm1;i++) {  // iterate in block
-            actualIteration[index]=1/valMainDiag*(f[index]-valSubDiag*lastIterSol[index-n]-valSubDiag*lastIterSol[index-1]-valSubDiag*lastIterSol[index+1]-valSubDiag*lastIterSol[index+n]);
-        }
-
+    if(bid==1||bid==n-1) {  // Boundaries, nothing to do here
+        return;
     }
-*/
+    if(tid==1||tid==n-1) {  // Boundaries, nothing to do here
+        return;
+    }
+    index=bid*n+tid;
+    actualIteration[index]=1/valMainDiag*(f[index]-valSubDiag*lastIterSol[index-n]-valSubDiag*lastIterSol[index-1]-valSubDiag*lastIterSol[index+1]-valSubDiag*lastIterSol[index+n]);
+
 }
 
 
@@ -294,7 +284,7 @@ void aufg13b() {
     int doneIterations=0;
 
     initMatrixRightHandSideCuda_CUDA<<<n,n>>>(h,cuda_fun);
-    result=jacobiIter(n, cuda_fun, boundaryValue, &doneIterations,h);
+    result=jacobiIterCuda_CPU(n, cuda_fun, boundaryValue, &doneIterations,h);
 
 
 
