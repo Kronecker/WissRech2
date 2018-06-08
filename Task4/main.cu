@@ -219,10 +219,13 @@ flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* num
         if(iteration%step==0) {
             calculateResidual_CUDA <<<n,n>>>(cuda_actualIteration, cuda_lastIterSol, resiCuda);
             cudaMemcpy(&resi,resiCuda,sizeof(flouble),cudaMemcpyDeviceToHost);
+
             cout<<iteration*2<<": "<<resi<<endl;
             if(resi<tol) {
                 break;
             }
+            resi=0;
+            cudaMemcpy(resiCuda,&resi,sizeof(flouble),cudaMemcpyHostToDevice);
         }
         iteration++;
 
