@@ -19,8 +19,9 @@ flouble* jacobiIter(int n, flouble *f, flouble valBoundary, int* numberOfIterati
 void aufg13b();
 flouble* jacobiIterCuda_CPU(int n, flouble *f, flouble valBoundary, int* numberOfIterations, flouble h);
 __global__ void initMatrixRightHandSideCuda_CUDA(flouble h, flouble* matrix);
-__global__ void cuda_initSolutionVectors (flouble *actualIteration, flouble valBoundary);
-
+__global__ void initSolutionVectors_CUDA(flouble *actualIteration, flouble valBoundary);
+__global__ void jacoboIteration_CUDA(flouble *actualIteration, flouble *lastIterSol, int n, flouble valSubDiag,
+                                     flouble valMainDiag, flouble *f);
 
 void aufg13c();
 
@@ -190,7 +191,7 @@ flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* num
     cudaMalloc(&cuda_actualIteration,sizeof(flouble)*nn);;
     cudaMalloc(&cuda_lastIterSol,sizeof(flouble)*nn);;
 
-    cuda_initSolutionVectors<<<n,n>>> (cuda_actualIteration, valBoundary);
+    initSolutionVectors_CUDA <<<n,n>>> (cuda_actualIteration, valBoundary);
 
     cudaMemcpy(actualIteration,cuda_actualIteration,nn*sizeof(flouble),cudaMemcpyDeviceToHost);
 
@@ -207,8 +208,8 @@ flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* num
     while(iteration<100) {
         // consecutive blocks
 
-        cuda_jacoboIteration<<<n,n>>>(cuda_actualIteration,cuda_lastIterSol,n,valSubDiag,valMainDiag,cudaF);
-        cuda_jacoboIteration<<<n,n>>>(cuda_lastIterSol,cuda_actualIteration,n,valSubDiag,valMainDiag,cudaF);
+        jacoboIteration_CUDA <<<n,n>>>(cuda_actualIteration,cuda_lastIterSol,n,valSubDiag,valMainDiag,cudaF);
+        jacoboIteration_CUDA <<<n,n>>>(cuda_lastIterSol,cuda_actualIteration,n,valSubDiag,valMainDiag,cudaF);
 
 //        if (!(iteration % step)) {
 //            resi=0;
@@ -230,7 +231,7 @@ flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* num
 
 }
 
-__global__ void cuda_initSolutionVectors (flouble *actualIteration, flouble valBoundary) {
+__global__ void initSolutionVectors_CUDA(flouble *actualIteration, flouble valBoundary) {
     int tid = threadIdx.x;
     int bid = blockIdx.x;
     int n = blockDim.x;
@@ -248,7 +249,8 @@ __global__ void cuda_initSolutionVectors (flouble *actualIteration, flouble valB
 
 
 
-__global__ void cuda_jacoboIteration (flouble* actualIteration,flouble*  lastIterSol,int n,flouble valSubDiag,flouble  valMainDiag, flouble* f ) {
+__global__ void jacoboIteration_CUDA(flouble *actualIteration, flouble *lastIterSol, int n, flouble valSubDiag,
+                                     flouble valMainDiag, flouble *f) {
     int index;  //index=k*n+i;
     int tid=threadIdx.x;
     int bid=blockIdx.x;
@@ -351,7 +353,7 @@ void displayMyMatrix(flouble* matrix, int m,int n) {
 void saveMyMatrix(flouble* matrix, int m,int n, flouble h) {
     // h=1 for save indices
     std::ofstream myfile;
-    myfile.open ("./../T13a.dat");
+    myfile.open ("./T13a.dat");
     flouble x;
     flouble y;
     for (int i=0;i<m;i++) {
