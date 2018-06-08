@@ -109,7 +109,7 @@ __global__ void initMatrixRightHandSideCuda_1Core_CUDA(flouble h, flouble* matri
 __global__ void initSolutionVectors_1Core_CUDA(flouble *actualIteration, flouble valBoundary, int n) {
     int tid = threadIdx.x;
     int bid = blockIdx.x;
-    int n = blockDim.x;
+
 
     if ((bid == 0)||(bid == n-1)) {  // boundary values init (outer)
         actualIteration[n * bid + tid] = valBoundary;
