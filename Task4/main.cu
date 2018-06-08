@@ -276,7 +276,7 @@ __global__ void jacoboIteration_CUDA(flouble *actualIteration, flouble *lastIter
 __global__ void calculateResidual_CUDA(float *a, float *b, float *c) {
     __shared__ float se[1024];
 
-    int tid=threadId.x;
+    int tid=threadIdx.x;
     int bid=blockIdx.x;
     int n=blockDim.x;
     // Calculate a.*b
@@ -302,7 +302,7 @@ __global__ void calculateResidual_CUDA(float *a, float *b, float *c) {
 __global__ void calculateResidual_CUDA(double *a, double *b, double *c) {
     __shared__ double se[1024];
 
-    int tid=threadId.x;
+    int tid=threadIdx.x;
     int bid=blockIdx.x;
     int n=blockDim.x;
 
