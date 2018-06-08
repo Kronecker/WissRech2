@@ -225,7 +225,7 @@ flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* num
     }
     std::cout << "Calculation finished after "<<iteration<<" Iterations.(%"<<step<<")"<<std::endl;
     *numberOfIterations=iteration;
-
+    cudaMemcpy(actualIteration,cuda_actualIteration, sizeof(float)*nn, cudaMemcpyDeviceToHost);
 
     return actualIteration;
 
@@ -262,6 +262,7 @@ __global__ void jacoboIteration_CUDA(flouble *actualIteration, flouble *lastIter
     if(tid==1||tid==n-1) {  // Boundaries, nothing to do here
         return;
     }
+
     index=bid*n+tid;
     actualIteration[index]=1/valMainDiag*(f[index]-valSubDiag*lastIterSol[index-n]-valSubDiag*lastIterSol[index-1]-valSubDiag*lastIterSol[index+1]-valSubDiag*lastIterSol[index+n]);
 
