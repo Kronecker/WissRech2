@@ -24,7 +24,7 @@ void aufg13a() {
     fun=initMatrixRightHandSide(n,h);
     result=jacobiIter(n, fun, boundaryValue, &doneIterations,h);
 
-    saveMyMatrix(result, n,n,h,1);
+    saveMyMatrix(result, n,n,h,0);
 
     delete(fun);
     delete(result);
