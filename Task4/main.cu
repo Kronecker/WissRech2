@@ -267,6 +267,9 @@ __global__ void jacoboIteration_CUDA(flouble *actualIteration, flouble *lastIter
 
     actualIteration[index]=1/valMainDiag*(f[index]-valSubDiag*lastIterSol[index-bdim]-valSubDiag*lastIterSol[index-1]-valSubDiag*lastIterSol[index+1]-valSubDiag*lastIterSol[index+bdim]);
 
+    if((bid==600)&&(tid==1)) {
+        printf("I'm alive %d\n",index);
+    }
 }
 
 
