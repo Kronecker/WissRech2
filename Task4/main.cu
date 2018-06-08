@@ -256,15 +256,15 @@ __global__ void jacoboIteration_CUDA(flouble *actualIteration, flouble *lastIter
     int bid=blockIdx.x;
     int bdim=blockDim.x;
 
-    if(bid==1||bid==gridDim.x-1) {  // Boundaries, nothing to do here
+    if(bid==0||bid==gridDim.x-1) {  // Boundaries, nothing to do here
         return;
     }
-    if(tid==1||tid==gridDim.x-1) {  // Boundaries, nothing to do here
+    if(tid==0||tid==gridDim.x-1) {  // Boundaries, nothing to do here
         return;
     }
 
     index=bid*bdim+tid;
-    printf("%d ",index);
+
     actualIteration[index]=1/valMainDiag*(f[index]-valSubDiag*lastIterSol[index-bdim]-valSubDiag*lastIterSol[index-1]-valSubDiag*lastIterSol[index+1]-valSubDiag*lastIterSol[index+bdim]);
 
 }
@@ -299,7 +299,7 @@ void aufg13b() {
 
     // displayMyMatrix(result,n,n);
 
-    saveMyMatrix(result, n,n,h);
+    saveMyMatrix(result, n,n,1);
 
 
 
