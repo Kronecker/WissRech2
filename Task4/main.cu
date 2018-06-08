@@ -256,15 +256,16 @@ __global__ void jacoboIteration_CUDA(flouble *actualIteration, flouble *lastIter
     int bid=blockIdx.x;
     int bdim=blockDim.x;
 
-    if(bid==1||bid==n-1) {  // Boundaries, nothing to do here
+    if(bid==1||bid==gridDim.x-1) {  // Boundaries, nothing to do here
         return;
     }
-    if(tid==1||tid==n-1) {  // Boundaries, nothing to do here
+    if(tid==1||tid==gridDim.x-1) {  // Boundaries, nothing to do here
         return;
     }
 
-    index=bid*n+tid;
-    actualIteration[index]=1/valMainDiag*(f[index]-valSubDiag*lastIterSol[index-n]-valSubDiag*lastIterSol[index-1]-valSubDiag*lastIterSol[index+1]-valSubDiag*lastIterSol[index+n]);
+    index=bid*bdim+tid;
+    printf("%d ",index);
+    actualIteration[index]=1/valMainDiag*(f[index]-valSubDiag*lastIterSol[index-bdim]-valSubDiag*lastIterSol[index-1]-valSubDiag*lastIterSol[index+1]-valSubDiag*lastIterSol[index+bdim]);
 
 }
 
@@ -354,7 +355,7 @@ void displayMyMatrix(flouble* matrix, int m,int n) {
 void saveMyMatrix(flouble* matrix, int m,int n, flouble h) {
     // h=1 for save indices
     std::ofstream myfile;
-    myfile.open ("./T13a.dat");
+    myfile.open ("./results.dat");
     flouble x;
     flouble y;
     for (int i=0;i<m;i++) {
