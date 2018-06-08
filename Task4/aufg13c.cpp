@@ -5,7 +5,7 @@
 using namespace std;
 
 flouble* jacobiIterCuda_1Core_CPU(int n, flouble *f, flouble valBoundary, int* numberOfIterations, flouble h);
-__global__ void initMatrixRightHandSideCuda_1Core_CUDA(flouble h, flouble* matrix);
+__global__ void initMatrixRightHandSideCuda_1Core_CUDA(flouble h, flouble* matrix, int n);
 __global__ void initSolutionVectors_1Core_CUDA(flouble *actualIteration, flouble valBoundary, int n);
 __global__ void jacoboIteration_1Core_CUDA(flouble *actualIteration, flouble *lastIterSol, int n, flouble valSubDiag,
                                      flouble valMainDiag, flouble *f);
@@ -106,7 +106,7 @@ __global__ void initMatrixRightHandSideCuda_1Core_CUDA(flouble h, flouble* matri
 
 }
 
-__global__ void initSolutionVectors_1Core_CUDA(flouble *actualIteration, flouble valBoundary) {
+__global__ void initSolutionVectors_1Core_CUDA(flouble *actualIteration, flouble valBoundary, int n) {
     int tid = threadIdx.x;
     int bid = blockIdx.x;
     int n = blockDim.x;
