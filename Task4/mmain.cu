@@ -14,8 +14,8 @@ void displayMyMatrix(flouble* matrix, int m,int n);
 void saveMyMatrix(flouble* matrix, int m,int n, flouble h, int numberTask);
 
 #include "aufg13a.cpp"
-#include "aufg13b.cpp"
-
+#include "aufg13b.cpp"  // An include-disaster waiting to happen ....
+#include "aufg13c.cpp"
 
 
 
@@ -23,10 +23,16 @@ void saveMyMatrix(flouble* matrix, int m,int n, flouble h, int numberTask);
 
 
 int main() {
+
     std::cout << "Hello, World!" << std::endl;
-    aufg13a();
+   // aufg13a();
+
     std::cout << "Hello, World!" << std::endl;
-    aufg13b();
+  //  aufg13b();
+
+    std::cout << "Hello, World!" << std::endl;
+    aufg13c();
+
     return 0;
 }
 
