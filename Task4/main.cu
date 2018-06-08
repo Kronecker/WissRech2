@@ -22,8 +22,8 @@ __global__ void initMatrixRightHandSideCuda_CUDA(flouble h, flouble* matrix);
 __global__ void initSolutionVectors_CUDA(flouble *actualIteration, flouble valBoundary);
 __global__ void jacoboIteration_CUDA(flouble *actualIteration, flouble *lastIterSol, int n, flouble valSubDiag,
                                      flouble valMainDiag, flouble *f);
-__global__ void calculateResidual_CUDA(double *a, double *b,int n, double *c);
-__global__ void calculateResidual_CUDA(float *a, float *b,int n, float *c);
+__global__ void calculateResidual_CUDA(double *a, double *b, double *c);
+__global__ void calculateResidual_CUDA(float *a, float *b, float *c);
 
 void aufg13c();
 
@@ -273,12 +273,12 @@ __global__ void jacoboIteration_CUDA(flouble *actualIteration, flouble *lastIter
 }
 
 
-__global__ void calculateResidual_CUDA(float *a, float *b,int n, float *c) {
-    __shared__ float se[n];
+__global__ void calculateResidual_CUDA(float *a, float *b, float *c) {
+    __shared__ float se[1024];
 
     int tid=threadId.x;
     int bid=blockIdx.x;
-
+    int n=blockDim.x;
     // Calculate a.*b
     se[tid]=fabsf(a[tid+bid*n]-b[tid+bid*n]);
     __syncthreads();
@@ -300,10 +300,11 @@ __global__ void calculateResidual_CUDA(float *a, float *b,int n, float *c) {
 }
 
 __global__ void calculateResidual_CUDA(double *a, double *b,int n, double *c) {
-    __shared__ double se[n];
+    __shared__ double se[1024];
 
     int tid=threadId.x;
     int bid=blockIdx.x;
+    int n=blockDim.x;
 
     // Calculate a.*b
     se[tid]=fabsf(a[tid+bid*n]-b[tid+bid*n]);
