@@ -28,8 +28,8 @@ void aufg13c() {
 
     int doneIterations=0;
 
-    initMatrixRightHandSideCuda_CUDA<<<1,n>>>(h,cuda_fun,n);
-    cudaMemcpy(result, cuda_fun,sizeof(flouble)*n*n,cudaMemcpyDeviceToHost)
+    initMatrixRightHandSideCuda_1Core_CUDA<<<1,n>>>(h,cuda_fun,n);
+    cudaMemcpy(result, cuda_fun,sizeof(flouble)*n*n,cudaMemcpyDeviceToHost);
   //  result=jacobiIterCuda_CPU(n, cuda_fun, boundaryValue, &doneIterations,h);
     cudaThreadExit();
 
