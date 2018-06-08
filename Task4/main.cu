@@ -5,7 +5,7 @@
 
 //#define flouble float
 #define flouble double
-#define MAXITERATIONS 2000
+#define MAXITERATIONS 20000
 
 
 using namespace std;
@@ -139,7 +139,7 @@ flouble* jacobiIter(int n, flouble *f, flouble valBoundary, int* numberOfIterati
             for(int i=0;i<n*n;i++) {
                 resi+=fabs(actualIteration[i]- lastIterSol[i]);
             }
-            //   std::cout << iteration <<": "<< resi<< std::endl;
+            std::cout << iteration <<": "<< resi<< std::endl;
         }
 
 
@@ -203,7 +203,7 @@ flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* num
     flouble *resiCuda;
     cudaMalloc(&resiCuda,sizeof(flouble));
     int step=100;
-    int maxDoubleIter=1000/2;
+    int maxDoubleIter=MAXITERATIONS/2;
 
     flouble hsquare=h*h;
     flouble valSubDiag=-1/hsquare;
