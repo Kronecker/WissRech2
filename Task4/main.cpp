@@ -7,6 +7,11 @@
 #define flouble double
 #define MAXITERATIONS 2000
 
+
+using namespace std;
+
+
+
 void aufg13a();
 flouble* initMatrixRightHandSide(int n, flouble h  );
 flouble* jacobiIter(int n, flouble *f, flouble valBoundary, int* numberOfIterations, flouble h);
