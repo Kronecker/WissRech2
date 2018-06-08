@@ -5,12 +5,13 @@
 
 //#define flouble float
 #define flouble double
-#define MAXITERATIONS 20000
+#define MAXITERATIONS 2000
+
 
 // Utility
 flouble* initMatrixKonstant(int m,int n, flouble value  ) ;
 void displayMyMatrix(flouble* matrix, int m,int n);
-void saveMyMatrix(flouble* matrix, int m,int n, flouble h);
+void saveMyMatrix(flouble* matrix, int m,int n, flouble h, int numberTask);
 
 #include "aufg13a.cpp"
 #include "aufg13b.cpp"
@@ -22,6 +23,7 @@ void saveMyMatrix(flouble* matrix, int m,int n, flouble h);
 
 
 int main() {
+    std::cout << "Hello, World!" << std::endl;
     aufg13a();
     std::cout << "Hello, World!" << std::endl;
     aufg13b();
@@ -52,10 +54,20 @@ void displayMyMatrix(flouble* matrix, int m,int n) {
     }
 }
 
-void saveMyMatrix(flouble* matrix, int m,int n, flouble h) {
+void saveMyMatrix(flouble* matrix, int m,int n, flouble h, int numberTask) {
     // h=1 for save indices
     std::ofstream myfile;
-    myfile.open ("./results.dat");
+    if (numberTask == 0)
+        myfile.open("./results_a.dat");
+    else if (numberTask == 1)
+        myfile.open("./results_b.dat");
+    else if (numberTask == 2)
+        myfile.open("./results_c.dat");
+    else if (numberTask == 3)
+        myfile.open("./results_d.dat");
+    else
+        myfile.open("./results_temp.dat");
+
     flouble x;
     flouble y;
     for (int i=0;i<m;i++) {

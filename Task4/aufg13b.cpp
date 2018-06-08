@@ -34,7 +34,7 @@ void aufg13b() {
     result=jacobiIterCuda_CPU(n, cuda_fun, boundaryValue, &doneIterations,h);
     cudaThreadExit();
 
-    saveMyMatrix(result, n,n,1);
+    saveMyMatrix(result, n,n,h,2);
 }
 
 flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* numberOfIterations, flouble h) {
