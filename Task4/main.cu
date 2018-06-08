@@ -18,6 +18,8 @@ flouble* jacobiIter(int n, flouble *f, flouble valBoundary, int* numberOfIterati
 
 void aufg13b();
 flouble* jacobiIterCuda_CPU(int n, flouble *f, flouble valBoundary, int* numberOfIterations, flouble h);
+__global__ void initMatrixRightHandSideCuda_CUDA(flouble h, flouble* matrix);
+
 
 void aufg13c();
 
@@ -32,7 +34,7 @@ void saveMyMatrix(flouble* matrix, int m,int n, flouble h);
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
-    aufg13a();
+    aufg13b();
     return 0;
 }
 
@@ -156,7 +158,16 @@ flouble* jacobiIter(int n, flouble *f, flouble valBoundary, int* numberOfIterati
 
 
 
+__global__ void initMatrixRightHandSideCuda_CUDA(flouble h, flouble* matrix) {
+    // Version for n==1024
+    int tid=threadIdx.x;
+    int bid=blockIdx.x;
 
+    flouble x=h*bid;
+    flouble y=h*tid;
+    matrix[bid*blockDim.x+tid]=x*(1-x)+y*(1-y);
+
+}
 
 
 
@@ -168,14 +179,14 @@ flouble* jacobiIter(int n, flouble *f, flouble valBoundary, int* numberOfIterati
 flouble* jacobiIterCuda_CPU(int n, flouble *f, flouble valBoundary, int* numberOfIterations, flouble h) {
 
     flouble* actualIteration=new flouble[n*n]();
-
+/*
 
     flouble* cuda_actualIteration;
     cudaMalloc(&cuda_actualIteration,sizeof(flouble)*n*n);;
     flouble* cuda_lastIterSol=new flouble[n*n]();
     cudaMalloc(&cuda_lastIterSol,sizeof(flouble)*n*n);;
     flouble *cuda_f;
-
+    cudaMalloc(&cuda_f,sizeof(flouble)*n*n);;
 
 
     flouble tol=0.0001;
@@ -189,7 +200,7 @@ flouble* jacobiIterCuda_CPU(int n, flouble *f, flouble valBoundary, int* numberO
 
 
 
-/*    // boundary values init (outer)
+    // boundary values init (outer)
     for(int i=0;i<n;i++) {
         actualIteration[i]=valBoundary;
         lastIterSol[i]=valBoundary;
@@ -233,6 +244,7 @@ flouble* jacobiIterCuda_CPU(int n, flouble *f, flouble valBoundary, int* numberO
 
     delete(lastIterSol);
     return actualIteration;*/
+return actualIteration;
 }
 
 __global__ void cuda_jacoboIteration (flouble* actualIteration,flouble*  lastIterSol,int n,flouble valSubDiag,flouble  valMainDiag, flouble* f ) {
@@ -257,7 +269,36 @@ __global__ void cuda_jacoboIteration (flouble* actualIteration,flouble*  lastIte
 
 void aufg13b() {
 
+    int n=1024;
+    int nn=n*n;
+    flouble h = 1./(n-1);
 
+    flouble boundaryValue=0;
+    flouble *cuda_fun;
+    flouble *testfun;
+    flouble *testfun2=new flouble[nn];
+    cudaMalloc(&cuda_fun,sizeof(flouble)*nn);;
+    flouble *result;
+
+    int doneIterations=0;
+
+    initMatrixRightHandSideCuda_CUDA<<<n,n>>>(h,cuda_fun);
+    testfun= initMatrixRightHandSide(n,  h);
+
+    cudaMemcpy(testfun2,cuda_fun,sizeof(flouble)*nn,cudaMemcpyDeviceToHost);
+    flouble resi=0;
+    for(int k=0;k<nn;k++) {
+        resi+=fabs(testfun[k]-testfun2[k]);
+    }
+
+cout<<resi<<endl;
+   // result=jacobiIter(n, fun, boundaryValue, &doneIterations,h);
+
+    //std::cout<<fun[1]<<std::endl;
+
+    // displayMyMatrix(result,n,n);
+
+  //  saveMyMatrix(result, n,n,h);
 
 
 
