@@ -19,6 +19,7 @@ flouble* jacobiIter(int n, flouble *f, flouble valBoundary, int* numberOfIterati
 void aufg13b();
 flouble* jacobiIterCuda_CPU(int n, flouble *f, flouble valBoundary, int* numberOfIterations, flouble h);
 __global__ void initMatrixRightHandSideCuda_CUDA(flouble h, flouble* matrix);
+__global__ void cuda_initSolutionVectors (flouble *actualIteration, flouble valBoundary)
 
 
 void aufg13c();
@@ -171,81 +172,92 @@ __global__ void initMatrixRightHandSideCuda_CUDA(flouble h, flouble* matrix) {
 
 
 
-
+// _________________________________________________________________________________________ //
+//
+//                                Aufgabe b
+// _________________________________________________________________________________________ //
 
 
 
 
 flouble* jacobiIterCuda_CPU(int n, flouble *f, flouble valBoundary, int* numberOfIterations, flouble h) {
 
-    flouble* actualIteration=new flouble[n*n]();
-/*
-
-    flouble* cuda_actualIteration;
-    cudaMalloc(&cuda_actualIteration,sizeof(flouble)*n*n);;
-    flouble* cuda_lastIterSol=new flouble[n*n]();
-    cudaMalloc(&cuda_lastIterSol,sizeof(flouble)*n*n);;
-    flouble *cuda_f;
-    cudaMalloc(&cuda_f,sizeof(flouble)*n*n);;
+    int nn=n*n;
+    flouble* actualIteration=new flouble[nn]();
 
 
-    flouble tol=0.0001;
-    int iteration=0;
-    flouble resi=tol+1;
-    int step=100;
+    flouble *cuda_actualIteration, *cuda_lastIterSol;
+    cudaMalloc(&cuda_actualIteration,sizeof(flouble)*nn);;
+    cudaMemset(cuda_actualIteration, 0, nn*sizeof(flouble));
+    cudaMalloc(&cuda_lastIterSol,sizeof(flouble)*nn);;
 
-    flouble hsquare=h*h;
-    flouble valSubDiag=-1/hsquare;
-    flouble valMainDiag=4/hsquare;
+    cuda_initSolutionVectors<<<n,n>>> (cuda_actualIteration, valBoundary);
 
+    cudaMemCopy(actualIteration,cuda_actualIteration,n*sizeof(flouble),cudaMemcpyDeviceToHost);
+//
+//    flouble tol=0.0001;
+//    int iteration=0;
+//    flouble resi=tol+1;
+//    int step=100;
+//
+//    flouble hsquare=h*h;
+//    flouble valSubDiag=-1/hsquare;
+//    flouble valMainDiag=4/hsquare;
+//
+//
+//
+//
+//
+//
+//    int nm1=n-1;
+//    int index;
+//    while(iteration<MAXITERATIONS&&resi>tol) {
+//        // consecutive blocks
+//
+//
+//
+//
+//        if (!(iteration % step)) {
+//            resi=0;
+//            for(int i=0;i<n*n;i++) {
+//                resi+=fabs(actualIteration[i]- lastIterSol[i]);
+//            }
+//            //   std::cout << iteration <<": "<< resi<< std::endl;
+//        }
+//
+//
+//        temp=lastIterSol;
+//        lastIterSol=actualIteration;
+//        actualIteration=temp;
+//        iteration++;
+//
+//
+//    }
+//    std::cout << "Calculation finished after "<<iteration<<" Iterations.(%"<<step<<")"<<std::endl;
+//    *numberOfIterations=iteration;
+//
 
+    return actualIteration;
 
-    // boundary values init (outer)
-    for(int i=0;i<n;i++) {
-        actualIteration[i]=valBoundary;
-        lastIterSol[i]=valBoundary;
-        actualIteration[n*(n-1)+i]=valBoundary;
-        lastIterSol[n*(n-1)+i]=valBoundary;
-    }
-    for(int k=1;k<n-1;k++) { // iterate through blocks
-        actualIteration[k*n]=valBoundary;
-        lastIterSol[k*n]=valBoundary;
-        actualIteration[(k+1)*n-1]=valBoundary;
-        lastIterSol[(k+1)*n-1]=valBoundary;
-    }
-
-
-    int nm1=n-1;
-    int index;
-    while(iteration<MAXITERATIONS&&resi>tol) {
-        // consecutive blocks
-
-
-
-
-        if (!(iteration % step)) {
-            resi=0;
-            for(int i=0;i<n*n;i++) {
-                resi+=fabs(actualIteration[i]- lastIterSol[i]);
-            }
-            //   std::cout << iteration <<": "<< resi<< std::endl;
-        }
-
-
-        temp=lastIterSol;
-        lastIterSol=actualIteration;
-        actualIteration=temp;
-        iteration++;
-
-
-    }
-    std::cout << "Calculation finished after "<<iteration<<" Iterations.(%"<<step<<")"<<std::endl;
-    *numberOfIterations=iteration;
-
-    delete(lastIterSol);
-    return actualIteration;*/
-return actualIteration;
 }
+
+__global__ void cuda_initSolutionVectors (flouble *actualIteration, flouble valBoundary) {
+    int tid = threadIdx.x;
+    int bid = blockIdx.x;
+    int n = blockDim.x;
+
+    if ((bid == 0)||(bid == n-1)) {  // boundary values init (outer)
+        actualIteration[n * bid + tid] = valBoundary;
+    } else {
+        if((tid==0)||tid==n-1) {
+            actualIteration[n * bid + tid] = valBoundary;
+        }else {
+            actualIteration[bid*n+tid] = 0;
+        }
+    }
+}
+
+
 
 __global__ void cuda_jacoboIteration (flouble* actualIteration,flouble*  lastIterSol,int n,flouble valSubDiag,flouble  valMainDiag, flouble* f ) {
 /*    int index;  //index=k*n+i;
@@ -275,30 +287,25 @@ void aufg13b() {
 
     flouble boundaryValue=0;
     flouble *cuda_fun;
-    flouble *testfun;
-    flouble *testfun2=new flouble[nn];
-    cudaMalloc(&cuda_fun,sizeof(flouble)*nn);;
-    flouble *result;
+    cudaMalloc(&cuda_fun,sizeof(flouble)*nn);
+
+    flouble *result=new flouble[nn];
 
     int doneIterations=0;
 
     initMatrixRightHandSideCuda_CUDA<<<n,n>>>(h,cuda_fun);
-    testfun= initMatrixRightHandSide(n,  h);
+    result=jacobiIter(n, cuda_fun, boundaryValue, &doneIterations,h);
 
-    cudaMemcpy(testfun2,cuda_fun,sizeof(flouble)*nn,cudaMemcpyDeviceToHost);
-    flouble resi=0;
-    for(int k=0;k<nn;k++) {
-        resi+=fabs(testfun[k]-testfun2[k]);
-    }
 
-cout<<resi<<endl;
+
+
    // result=jacobiIter(n, fun, boundaryValue, &doneIterations,h);
 
     //std::cout<<fun[1]<<std::endl;
 
     // displayMyMatrix(result,n,n);
 
-  //  saveMyMatrix(result, n,n,h);
+    saveMyMatrix(result, n,n,h);
 
 
 
