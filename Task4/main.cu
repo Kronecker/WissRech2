@@ -22,6 +22,8 @@ __global__ void initMatrixRightHandSideCuda_CUDA(flouble h, flouble* matrix);
 __global__ void initSolutionVectors_CUDA(flouble *actualIteration, flouble valBoundary);
 __global__ void jacoboIteration_CUDA(flouble *actualIteration, flouble *lastIterSol, int n, flouble valSubDiag,
                                      flouble valMainDiag, flouble *f);
+__global__ void calculateResidual_CUDA(double *a, double *b,int n, double *c);
+__global__ void calculateResidual_CUDA(float *a, float *b,int n, float *c);
 
 void aufg13c();
 
@@ -198,34 +200,37 @@ flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* num
     flouble tol=0.0001;
     int iteration=0;
     flouble resi=tol+1;
+    flouble *resiCuda;
+    cudaMalloc(&resiCuda,sizeof(flouble));
     int step=100;
+    int maxDoubleIter=1000/2;
 
     flouble hsquare=h*h;
     flouble valSubDiag=-1/hsquare;
     flouble valMainDiag=4/hsquare;
 
 
-    while(iteration<100) {
+    while(iteration<maxDoubleIter) {
         // consecutive blocks
 
         jacoboIteration_CUDA <<<n,n>>>(cuda_actualIteration,cuda_lastIterSol,n,valSubDiag,valMainDiag,cudaF);
         jacoboIteration_CUDA <<<n,n>>>(cuda_lastIterSol,cuda_actualIteration,n,valSubDiag,valMainDiag,cudaF);
 
-//        if (!(iteration % step)) {
-//            resi=0;
-//            for(int i=0;i<n*n;i++) {
-//                resi+=fabs(actualIteration[i]- lastIterSol[i]);
-//            }
-//            //   std::cout << iteration <<": "<< resi<< std::endl;
-//        }
-
-        iteration++;iteration++;
+        if(iteration%step==0) {
+            calculateResidual_CUDA <<<n,n>>>(cuda_actualIteration, cuda_lastIterSol, n, resiCuda);
+            cudaMemcpy(&resi,resiCuda,sizeof(flouble),cudaMemcpyDeviceToHost);
+            cout<<iteration*2<<": "<<resi<<endl;
+            if(resi<tol) {
+                break;
+            }
+        }
+        iteration++;
 
 
     }
-    std::cout << "Calculation finished after "<<iteration<<" Iterations.(%"<<step<<")"<<std::endl;
-    *numberOfIterations=iteration;
-    cudaMemcpy(actualIteration,cuda_actualIteration, sizeof(float)*nn, cudaMemcpyDeviceToHost);
+    std::cout << "Calculation finished after "<<2*iteration<<" Iterations.(%"<<step<<")"<<std::endl;
+    *numberOfIterations=iteration*2;
+    cudaMemcpy(actualIteration,cuda_actualIteration, sizeof(flouble)*nn, cudaMemcpyDeviceToHost);
 
     return actualIteration;
 
@@ -264,17 +269,61 @@ __global__ void jacoboIteration_CUDA(flouble *actualIteration, flouble *lastIter
     }
 
     index=bid*bdim+tid;
-
     actualIteration[index]=1/valMainDiag*(f[index]-valSubDiag*lastIterSol[index-bdim]-valSubDiag*lastIterSol[index-1]-valSubDiag*lastIterSol[index+1]-valSubDiag*lastIterSol[index+bdim]);
-
-    if((bid==600)&&(tid==1)) {
-        printf("I'm alive %d\n",index);
-    }
 }
 
 
+__global__ void calculateResidual_CUDA(float *a, float *b,int n, float *c) {
+    __shared__ float se[n];
+
+    int tid=threadId.x;
+    int bid=blockIdx.x;
+
+    // Calculate a.*b
+    se[tid]=fabsf(a[tid+bid*n]-b[tid+bid*n]);
+    __syncthreads();
+
+    // Sum Reducto
+    int numActiveThreads=n/2;
+    while(numActiveThreads>0) {
+        if(tid<numActiveThreads) {
+            se[tid]=se[tid]+se[tid+numActiveThreads];
+        }
+        numActiveThreads=numActiveThreads/2;
+        __syncthreads();
+    }
 
 
+    if(tid==0) {
+        atomicAdd(c,se[0]);
+    }
+}
+
+__global__ void calculateResidual_CUDA(double *a, double *b,int n, double *c) {
+    __shared__ double se[n];
+
+    int tid=threadId.x;
+    int bid=blockIdx.x;
+
+    // Calculate a.*b
+    se[tid]=fabsf(a[tid+bid*n]-b[tid+bid*n]);
+    __syncthreads();
+
+    // Sum Reducto
+    int numActiveThreads=n/2;
+    while(numActiveThreads>0) {
+        if(tid<numActiveThreads) {
+            se[tid]=se[tid]+se[tid+numActiveThreads];
+        }
+        numActiveThreads=numActiveThreads/2;
+        __syncthreads();
+    }
+
+
+    if(tid==0) {
+        atomicAdd(c,se[0]);
+    }
+}
 
 void aufg13b() {
 
