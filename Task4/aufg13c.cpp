@@ -53,26 +53,29 @@ flouble* jacobiIterCuda_1Core_CPU(int n, flouble *cudaF, flouble valBoundary, in
 
     initSolutionVectors_CUDA <<<n,n>>> (cuda_actualIteration, valBoundary);
   // a
-    flouble tol=0.0001;
-    int iteration=0;
+
+
     flouble resi=tol+1;
-    flouble *itas;
+    flouble *resi_Cuda;
+    cudaMalloc(&resi_Cuda,sizeof(flouble));
+    int *itas;
     cudaMalloc(&itas,sizeof(int));
-    int step=100;  // 2 Iterations
-    int maxDoubleIter=MAXITERATIONS/2;
+
 
     flouble hsquare=h*h;
     flouble valSubDiag=-1/hsquare;
     flouble valMainDiag=4/hsquare;
 
-    //initSolutionVectors_1Core_CUDA<<<1,n>>>(cuda_actualIteration,cuda_lastIterSol,n,valSubDiag,valMainDiag,cudaF);
-    while(iteration<maxDoubleIter) {
-        // consecutive blocks
+    jacoboIteration_1Core_CUDA<<<1,n>>>(cuda_actualIteration,cuda_lastIterSol,n,valSubDiag,valMainDiag,cudaF,resi_Cuda, itas);
+
+    cudaMemcpy(&iteration,itas,sizeof(int),cudaMemcpyDeviceToHost);
+    cudaMemcpy(resi,resi_Cuda,sizeof(int),cudaMemcpyDeviceToHost);
 
 
-    }
+
+
     std::cout << "Calculation finished after "<<2*iteration<<" Iterations.(%"<<step<<")"<<std::endl;
-    *numberOfIterations=iteration*2;
+    *numberOfIterations=*iterations;
     cudaMemcpy(actualIteration,cuda_actualIteration, sizeof(flouble)*nn, cudaMemcpyDeviceToHost);
 
     return actualIteration;
@@ -112,67 +115,51 @@ __global__ void initSolutionVectors_1Core_CUDA(flouble *actualIteration, flouble
 
 
 __global__ void jacoboIteration_1Core_CUDA(flouble *actualIteration, flouble *lastIterSol, int n, flouble valSubDiag,
-                                     flouble valMainDiag, flouble *f, int *iteration) {
+                                     flouble valMainDiag, flouble *f,flouble *resi ,int *iteration) {
+    *iteration=0;
+    *resi=0;
     int index;  //index=k*n+i;
     int tid = threadIdx.x;
     int bid = blockIdx.x;
     int step=100;
+    flouble tol=0.0001;
+    flouble *temp;
+    int maxIter=2000;
 
 
-    for (bid = 1; bid < n-1; bid++) {
+    while(*iteration<maxIter) {
+        for (bid = 1; bid < n - 1; bid++) {
 
-        if (tid == 0 || tid == n - 1) {  // Boundaries, nothing to do here
-            continue;
+            if (tid == 0 || tid == n - 1) {  // Boundaries, nothing to do here
+                continue;
+            }
+
+            index = bid * n + tid;
+            actualIteration[index] = 1 / valMainDiag *
+                                     (f[index] - valSubDiag * lastIterSol[index - n] -
+                                      valSubDiag * lastIterSol[index - 1] -
+                                      valSubDiag * lastIterSol[index + 1] - valSubDiag * lastIterSol[index + n]);
+
         }
 
-        index = bid * n + tid;
-        actualIteration[index] = 1 / valMainDiag *
-                                 (f[index] - valSubDiag * lastIterSol[index - n] -
-                                  valSubDiag * lastIterSol[index - 1] -
-                                  valSubDiag * lastIterSol[index + 1] - valSubDiag * lastIterSol[index + n]);
 
-
-
-
-        if(tid==0) {
-            iteration++;
+        if (tid == 0) {
+            *iteration=*iteration+1;
         }
         __syncthreads();
-//        if(iteration%step==0) {
-//            calculateResidual_CUDA(cuda_actualIteration, cuda_lastIterSol, resiCuda,n);
-//            cudaMemcpy(&resi,resiCuda,sizeof(flouble),cudaMemcpyDeviceToHost);
-//
-//            cout<<iteration*2<<": "<<resi<<endl;
-//            if(resi<tol) {
-//                break;
-//            }
-//            resi=0;  // Reset resiCuda.....is there any better way?
-//            cudaMemcpy(resiCuda,&resi,sizeof(flouble),cudaMemcpyHostToDevice);
-//        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        temp=lastIterSol;
+        lastIterSol=actualIteration;
+        actualIteration=temp;
+        if (*iteration % step == 0) {
+            calculateResidual_CUDA(actualIteration, lastIterSol, resi, n);
+            if (*resi < tol) {
+                break;
+            }
+            *resi = 0;
+        }
     }
+
+
 }
 
 
@@ -182,8 +169,7 @@ __device__ void calculateResidual_1Core_CUDA(float *a, float *b, float *c, int n
     int tid=threadIdx.x;
     int bid;
 
-    printf("hi %d",tid);
-    return;
+
 
     for(bid=0;bid<n;bid++) {
         //   Calculate
@@ -213,8 +199,7 @@ __device__ void calculateResidual_1Core_CUDA(double *a, double *b, double *c, in
     int tid=threadIdx.x;
     int bid;
 
-    printf("hi %d",tid);
-    return;
+
 
     for(bid=0;bid<n;bid++) {
         //   Calculate
