@@ -69,12 +69,12 @@ flouble* jacobiIterCuda_1Core_CPU(int n, flouble *cudaF, flouble valBoundary, in
     jacoboIteration_1Core_CUDA<<<1,n>>>(cuda_actualIteration,cuda_lastIterSol,n,valSubDiag,valMainDiag,cudaF,resi_Cuda, itas);
 
     cudaMemcpy(numberOfIterations,itas,sizeof(int),cudaMemcpyDeviceToHost);
-    cudaMemcpy(resi,resi_Cuda,sizeof(flouble),cudaMemcpyDeviceToHost);
+    cudaMemcpy(&resi,resi_Cuda,sizeof(flouble),cudaMemcpyDeviceToHost);
 
 
 
 
-    std::cout << "Calculation finished after "<<*numberOfIterations<<" Iterations.(%"<<step<<")"<<std::endl;
+    std::cout << "Calculation finished after "<<*numberOfIterations<<" Iterations."<<std::endl;
     cudaMemcpy(actualIteration,cuda_actualIteration, sizeof(flouble)*nn, cudaMemcpyDeviceToHost);
 
     return actualIteration;
@@ -150,7 +150,7 @@ __global__ void jacoboIteration_1Core_CUDA(flouble *actualIteration, flouble *la
         lastIterSol=actualIteration;
         actualIteration=temp;
         if (*iteration % step == 0) {
-            calculateResidual_CUDA(actualIteration, lastIterSol, resi, n);
+            calculateResidual_1Core_CUDA(actualIteration, lastIterSol, resi, n);
             if (*resi < tol) {
                 break;
             }
