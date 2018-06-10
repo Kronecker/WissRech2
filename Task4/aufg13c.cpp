@@ -8,7 +8,7 @@ flouble* jacobiIterCuda_1Core_CPU(int n, flouble *f, flouble valBoundary, int* n
 __global__ void initMatrixRightHandSideCuda_1Core_CUDA(flouble h, flouble* matrix, int n);
 __global__ void initSolutionVectors_1Core_CUDA(flouble *actualIteration, flouble valBoundary, int n);
 __global__ void jacoboIteration_1Core_CUDA(flouble *actualIteration, flouble *lastIterSol, int n, flouble valSubDiag,
-                                     flouble valMainDiag, flouble *f);
+                                           flouble valMainDiag, flouble *f,flouble *resi ,int *iteration);
 __device__ void calculateResidual_1Core_CUDA(double *a, double *b, double *c, int n);
 __device__ void calculateResidual_1Core_CUDA(float *a, float *b, float *c, int n);
 
@@ -30,10 +30,10 @@ void aufg13c() {
 
     initMatrixRightHandSideCuda_1Core_CUDA<<<1,n>>>(h,cuda_fun,n);
 
-   // result=jacobiIterCuda_CPU(n, cuda_fun, boundaryValue, &doneIterations,h);
+    result=jacobiIterCuda_CPU(n, cuda_fun, boundaryValue, &doneIterations,h);
     cudaThreadExit();
 
-  //  saveMyMatrix(result, n,n,h,2);
+    saveMyMatrix(result, n,n,h,2);
 
 }
 
@@ -55,7 +55,7 @@ flouble* jacobiIterCuda_1Core_CPU(int n, flouble *cudaF, flouble valBoundary, in
   // a
 
 
-    flouble resi=tol+1;
+    flouble resi=1;
     flouble *resi_Cuda;
     cudaMalloc(&resi_Cuda,sizeof(flouble));
     int *itas;
@@ -68,14 +68,13 @@ flouble* jacobiIterCuda_1Core_CPU(int n, flouble *cudaF, flouble valBoundary, in
 
     jacoboIteration_1Core_CUDA<<<1,n>>>(cuda_actualIteration,cuda_lastIterSol,n,valSubDiag,valMainDiag,cudaF,resi_Cuda, itas);
 
-    cudaMemcpy(&iteration,itas,sizeof(int),cudaMemcpyDeviceToHost);
-    cudaMemcpy(resi,resi_Cuda,sizeof(int),cudaMemcpyDeviceToHost);
+    cudaMemcpy(numberOfIterations,itas,sizeof(int),cudaMemcpyDeviceToHost);
+    cudaMemcpy(resi,resi_Cuda,sizeof(flouble),cudaMemcpyDeviceToHost);
 
 
 
 
-    std::cout << "Calculation finished after "<<2*iteration<<" Iterations.(%"<<step<<")"<<std::endl;
-    *numberOfIterations=*iterations;
+    std::cout << "Calculation finished after "<<*numberOfIterations<<" Iterations.(%"<<step<<")"<<std::endl;
     cudaMemcpy(actualIteration,cuda_actualIteration, sizeof(flouble)*nn, cudaMemcpyDeviceToHost);
 
     return actualIteration;
