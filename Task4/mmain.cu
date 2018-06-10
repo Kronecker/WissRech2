@@ -13,8 +13,8 @@ flouble* initMatrixKonstant(int m,int n, flouble value  ) ;
 void displayMyMatrix(flouble* matrix, int m,int n);
 void saveMyMatrix(flouble* matrix, int m,int n, flouble h, int numberTask);
 
-#include "aufg13a.cpp"
-#include "aufg13b.cpp"  // An include-disaster waiting to happen ....
+//#include "aufg13a.cpp"
+//#include "aufg13b.cpp"  // An include-disaster waiting to happen ....
 #include "aufg13c.cpp"
 
 
