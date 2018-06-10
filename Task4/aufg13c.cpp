@@ -9,8 +9,8 @@ __global__ void initMatrixRightHandSideCuda_1Core_CUDA(flouble h, flouble* matri
 __global__ void initSolutionVectors_1Core_CUDA(flouble *actualIteration, flouble valBoundary, int n);
 __global__ void jacoboIteration_1Core_CUDA(flouble *actualIteration, flouble *lastIterSol, int n, flouble valSubDiag,
                                      flouble valMainDiag, flouble *f);
-__global__ void calculateResidual_1Core_CUDA(double *a, double *b, double *c);
-__global__ void calculateResidual_1Core_CUDA(float *a, float *b, float *c);
+__global__ void calculateResidual_1Core_CUDA(double *a, double *b, double *c, int n);
+__global__ void calculateResidual_1Core_CUDA(float *a, float *b, float *c, int n);
 
 
 
@@ -56,7 +56,7 @@ flouble* jacobiIterCuda_1Core_CPU(int n, flouble *cudaF, flouble valBoundary, in
     flouble tol=0.0001;
     int iteration=0;
     flouble resi=tol+1;
-    flouble *intas;
+    flouble *itas;
     cudaMalloc(&itas,sizeof(int));
     int step=100;  // 2 Iterations
     int maxDoubleIter=MAXITERATIONS/2;
@@ -65,7 +65,7 @@ flouble* jacobiIterCuda_1Core_CPU(int n, flouble *cudaF, flouble valBoundary, in
     flouble valSubDiag=-1/hsquare;
     flouble valMainDiag=4/hsquare;
 
-    initSolutionVectors_1Core_CUDA<<<1,n>>>(cuda_actualIteration,cuda_lastIterSol,n,valSubDiag,valMainDiag,cudaF)
+    //initSolutionVectors_1Core_CUDA<<<1,n>>>(cuda_actualIteration,cuda_lastIterSol,n,valSubDiag,valMainDiag,cudaF);
     while(iteration<maxDoubleIter) {
         // consecutive blocks
 
@@ -90,7 +90,7 @@ __global__ void initMatrixRightHandSideCuda_1Core_CUDA(flouble h, flouble* matri
         matrix[bid * blockDim.x + tid] = x * (1 - x) + y * (1 - y);
 
     }
-    calculateResidual_1Core_CUDA(nullptr,nullptr,nullptr,1);
+    calculateResidual_1Core_CUDA(matrix,matrix,matrix,1);
 }
 
 __global__ void initSolutionVectors_1Core_CUDA(flouble *actualIteration, flouble valBoundary, int n) {
