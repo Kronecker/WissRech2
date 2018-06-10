@@ -92,7 +92,7 @@ __global__ void initMatrixRightHandSideCuda_1Core_CUDA(flouble h, flouble* matri
         matrix[bid * blockDim.x + tid] = x * (1 - x) + y * (1 - y);
 
     }
-    calculateResidual_1Core_CUDA(matrix,matrix,matrix,1);
+
 }
 
 __global__ void initSolutionVectors_1Core_CUDA(flouble *actualIteration, flouble valBoundary, int n) {
