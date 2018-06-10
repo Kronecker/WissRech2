@@ -123,7 +123,7 @@ __global__ void jacoboIteration_1Core_CUDA(flouble *actualIteration, flouble *la
     int step=100;
     flouble tol=0.0001;
     flouble *temp;
-    int maxIter=2000;
+    int maxIter=2200;
 
 
     while(*iteration<maxIter) {

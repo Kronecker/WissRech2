@@ -10,9 +10,9 @@ __global__ void initMatrixRightHandSideCuda_CUDA(flouble h, flouble* matrix);
 __global__ void initSolutionVectors_CUDA(flouble *actualIteration, flouble valBoundary);
 __global__ void jacoboIteration_CUDA(flouble *actualIteration, flouble *lastIterSol, int n, flouble valSubDiag,
                                      flouble valMainDiag, flouble *f);
-__device__ void calculateResidual_CUDA(double *a, double *b, double *c);
-__device__ void calculateResidual_CUDA(float *a, float *b, float *c);
-__global__ flouble* jacobiIterCuda_1Core_CPU(int n, flouble *cudaF, flouble valBoundary, int* numberOfIterations, flouble h);
+__global__ void calculateResidual_CUDA(double *a, double *b, double *c);
+__global__ void calculateResidual_CUDA(float *a, float *b, float *c);
+
 
 
 
@@ -37,7 +37,7 @@ void aufg13b() {
     saveMyMatrix(result, n,n,h,1);
 }
 
-flouble* jacobiIterCuda_1Core_CPU(int n, flouble *cudaF, flouble valBoundary, int* numberOfIterations, flouble h) {
+flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* numberOfIterations, flouble h) {
 
     int nn=n*n;
     flouble* actualIteration=new flouble[nn]();
