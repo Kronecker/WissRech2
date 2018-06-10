@@ -30,7 +30,7 @@ void aufg13c() {
 
     initMatrixRightHandSideCuda_1Core_CUDA<<<1,n>>>(h,cuda_fun,n);
 
-    result=jacobiIterCuda_CPU(n, cuda_fun, boundaryValue, &doneIterations,h);
+    result=jacobiIterCuda_1Core_CPU(n, cuda_fun, boundaryValue, &doneIterations,h);
     cudaThreadExit();
 
     saveMyMatrix(result, n,n,h,2);
@@ -51,7 +51,7 @@ flouble* jacobiIterCuda_1Core_CPU(int n, flouble *cudaF, flouble valBoundary, in
     cudaMalloc(&cuda_actualIteration,sizeof(flouble)*nn);;
     cudaMalloc(&cuda_lastIterSol,sizeof(flouble)*nn);;
 
-    initSolutionVectors_CUDA <<<n,n>>> (cuda_actualIteration, valBoundary);
+    initSolutionVectors_1Core_CUDA <<<1,n>>> (cuda_actualIteration, valBoundary,n);
   // a
 
 
