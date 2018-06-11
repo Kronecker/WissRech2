@@ -22,7 +22,7 @@ void aufg13d() {
     int nn=n*n;
     flouble h = 1./(n-1);
 
-    flouble boundaryValue=2;
+    flouble boundaryValue=0;
     flouble *cuda_fun;
 
 
@@ -176,10 +176,6 @@ __global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flou
     int bid = blockIdx.x;
     int threads= blockDim.x;
     int blockId=bid+offset;
-
-    if(tid==0) {
-        printf("%d 0 |",blockId);
-    }
 
 
     if ((blockId == 0)||(blockId == n-1)) {  // boundary values init (outer)
