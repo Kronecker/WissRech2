@@ -116,8 +116,8 @@ void saveMyMatrixAppend(flouble* matrix, int m,int n, flouble h, int numberTask,
     flouble y;
     for (int i=0;i<m;i++) {
         for (int j=0;j<n;j++) {
-            x=h*i;
-            y=h*(j+offset);
+            x=h*(i+offset);
+            y=h*j;
             // printf("<%d %d %f>",x,y,matrix[i*m+j]);
             myfile<<x<<" "<<y<<" "<<matrix[i*n+j]<<"\n";
         }
