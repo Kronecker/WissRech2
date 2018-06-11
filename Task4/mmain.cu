@@ -86,7 +86,7 @@ void saveMyMatrix(flouble* matrix, int m,int n, flouble h, int numberTask) {
             x=h*i;
             y=h*j;
             // printf("<%d %d %f>",x,y,matrix[i*m+j]);
-            myfile<<x<<" "<<y<<" "<<matrix[i*m+j]<<"\n";
+            myfile<<x<<" "<<y<<" "<<matrix[i*n+j]<<"\n";
         }
         myfile<<std::endl;
         // printf(" \n");
