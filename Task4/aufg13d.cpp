@@ -5,7 +5,7 @@
 using namespace std;
 
 void aufg13b();
-flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble *f, flouble valBoundary, int* numberOfIterations, flouble h);
+flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIterations, flouble h);
 __global__ void initMatrixRightHandSideCuda_MultiGPU_CUDA(flouble h, flouble* matrix, int offset);
 __global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flouble valBoundary);
 __global__ void jacoboIteration_MultiGPU_CUDA(flouble *actualIteration, flouble *lastIterSol, int n, flouble valSubDiag,
@@ -31,13 +31,13 @@ void aufg13d() {
     int doneIterations=0;
 
 
-    result=jacobiIterCuda_MultiGPU_CPU(n, cuda_fun, boundaryValue, &doneIterations,h);
+    result=jacobiIterCuda_MultiGPU_CPU(n, boundaryValue, &doneIterations,h);
     cudaThreadExit();
 
    // saveMyMatrix(result, n,n,h,3);
 }
 
-flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble *cudaF, flouble valBoundary, int* numberOfIterations, flouble h) {
+flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIterations, flouble h) {
 
     int nn=n*n;
     int m=(nn/2+n);
@@ -46,8 +46,8 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble *cudaF, flouble valBoundary,
 
     flouble *cuda_actualIterationD0, *cuda_lastIterSolD0;
     flouble *cuda_actualIterationD1, *cuda_lastIterSolD1;
-    cudaMalloc(&cuda_D0_actualIteration,sizeof(flouble)*m);
-    cudaMalloc(&cuda_D0_lastIterSol,sizeof(flouble)*m);
+    cudaMalloc(&cuda_actualIterationD0,sizeof(flouble)*m);
+    cudaMalloc(&cuda_actualIterationD1,sizeof(flouble)*m);
 
     flouble *cuda_funD0,*cuda_funD1;
 
@@ -60,9 +60,9 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble *cudaF, flouble valBoundary,
     initMatrixRightHandSideCuda_MultiGPU_CUDA<<<n/2+1,n>>>(h,cuda_funD1,n/2);
 
 
-    cudaMemcpy(actualIteration,cuda_funD0,cudaMemcpyDeviceToHost);
+    cudaMemcpy(actualIteration,cuda_funD0,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
 
-    saveMyMatrix(result,n/2+1,n,h,3);
+    saveMyMatrix(actualIteration,n/2+1,n,h,3);
 
     return actualIteration;
 /*
