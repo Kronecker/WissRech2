@@ -139,6 +139,8 @@ __global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flou
 
 
     if ((blockId == 0)||(blockId == n-1)) {  // boundary values init (outer)
+        if(tid==0) printf("hi");
+
         actualIteration[threads * bid + tid] = valBoundary;
     } else {
         if((tid==0)||tid==threads-1) {
