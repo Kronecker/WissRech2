@@ -124,7 +124,7 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
 
         iteration++;
         if(false&&iteration%step==0) {
-            calculateResidual_MultiGPU_CUDA <<<n,n>>>(cuda_actualIteration, cuda_lastIterSol, resiCuda);
+       /*     calculateResidual_MultiGPU_CUDA <<<n,n>>>(cuda_actualIteration, cuda_lastIterSol, resiCuda);
             cudaMemcpy(&resi,resiCuda,sizeof(flouble),cudaMemcpyDeviceToHost);
 
             cout<<iteration*2<<": "<<resi<<endl;
@@ -132,7 +132,7 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
                 break;
             }
             resi=0;  // Reset resiCuda.....is there any better way?
-            cudaMemcpy(resiCuda,&resi,sizeof(flouble),cudaMemcpyHostToDevice);
+            cudaMemcpy(resiCuda,&resi,sizeof(flouble),cudaMemcpyHostToDevice);*/
         }
     }
     std::cout << "Calculation finished after "<<2*iteration<<" Iterations.(%"<<step<<")"<<std::endl;
