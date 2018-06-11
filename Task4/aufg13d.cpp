@@ -144,7 +144,7 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
 
    cudaSetDevice(1);
    cudaMemcpy(actualIteration,cuda_lastIterSolD1,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
-   saveMyMatrixAppend(&actualIteration[n],n/2,n,1,3,n/2+1);
+   saveMyMatrixAppend(&actualIteration[n],n/2,n,1,3,n/2);
 
 
  //   cudaMemcpy(actualIteration,cuda_actualIteration, sizeof(flouble)*nn, cudaMemcpyDeviceToHost);
