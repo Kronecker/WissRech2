@@ -46,7 +46,9 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
 
     flouble *cuda_actualIterationD0, *cuda_lastIterSolD0;
     flouble *cuda_actualIterationD1, *cuda_lastIterSolD1;
+    cudaSetDevice(0);
     cudaMalloc(&cuda_actualIterationD0,sizeof(flouble)*m);
+    cudaSetDevice(1);
     cudaMalloc(&cuda_actualIterationD1,sizeof(flouble)*m);
 
     flouble *cuda_funD0,*cuda_funD1;
@@ -139,12 +141,8 @@ __global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flou
     int threads= blockDim.x;
     int blockId=bid+offset;
 
-
-    if(blockId==0&&tid==0) {
-        printf("0 0");
-    }
     if(tid==0) {
-        printf("%d 0",blockId);
+        printf("%d 0 |",blockId);
     }
 
 
