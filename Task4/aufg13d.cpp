@@ -51,7 +51,9 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
 
     flouble *cuda_funD0,*cuda_funD1;
 
+    cudaSetDevice(0);
     cudaMalloc(&cuda_funD0,sizeof(flouble)*m);
+    cudaSetDevice(1);
     cudaMalloc(&cuda_funD1,sizeof(flouble)*m);
 
     cudaSetDevice(0);
@@ -59,7 +61,7 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
     cudaSetDevice(1);
     initMatrixRightHandSideCuda_MultiGPU_CUDA<<<n/2+1,n>>>(h,cuda_funD1,n/2);
 
-
+    cudaSetDevice(0);
     cudaMemcpy(actualIteration,cuda_funD0,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
 
     saveMyMatrix(actualIteration,n/2+1,n,h,3);
