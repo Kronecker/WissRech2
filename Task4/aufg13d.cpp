@@ -143,7 +143,7 @@ __global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flou
     if(blockId==0&&tid==0) {
         printf("0 0");
     }
-    if(blockId>n-4&&tid==0) {
+    if(tid==0) {
         printf("%d 0",blockId);
     }
 
