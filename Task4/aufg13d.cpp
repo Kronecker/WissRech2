@@ -44,12 +44,14 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
     flouble* actualIteration=new flouble[nn]();
 
 
-    flouble *cuda_actualIterationD0, *cuda_lastIterSolD0;
+    flouble *cuda_actualIterationD0, *cuda_lastIterSolD0, *temp;
     flouble *cuda_actualIterationD1, *cuda_lastIterSolD1;
     cudaSetDevice(0);
     cudaMalloc(&cuda_actualIterationD0,sizeof(flouble)*m);
+    cudaMalloc(&cuda_lastIterSolD0,sizeof(flouble)*m);
     cudaSetDevice(1);
     cudaMalloc(&cuda_actualIterationD1,sizeof(flouble)*m);
+    cudaMalloc(&cuda_lastIterSolD1,sizeof(flouble)*m);
 
     flouble *cuda_funD0,*cuda_funD1;
 
@@ -63,33 +65,27 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
     cudaSetDevice(1);
     initMatrixRightHandSideCuda_MultiGPU_CUDA<<<n/2+1,n>>>(h,cuda_funD1,n/2-1);
     cudaSetDevice(1);
-    cudaMemcpy(actualIteration,cuda_funD1,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
-    saveMyMatrix(actualIteration, n/2+1,n,1,2);
-
 
     cudaSetDevice(0);
     initSolutionVectors_MultiGPU_CUDA <<<n/2+1,n>>> (cuda_actualIterationD0, valBoundary,n,0);
     cudaSetDevice(1);
     initSolutionVectors_MultiGPU_CUDA <<<n/2+1,n>>> (cuda_actualIterationD1, valBoundary,n,n/2-1);
 
-    cudaSetDevice(0);
-    cudaMemcpy(actualIteration,cuda_actualIterationD0,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
-    saveMyMatrix(actualIteration, n/2+1,n,1,3);
-
-    cudaSetDevice(1);
-    cudaMemcpy(actualIteration,cuda_actualIterationD1,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
-    saveMyMatrix(actualIteration, n/2+1,n,1,4);
-
-return actualIteration;
-
-/*
+//    cudaSetDevice(0);
+//    cudaMemcpy(actualIteration,cuda_actualIterationD0,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
+//    saveMyMatrix(actualIteration, n/2+1,n,1,3);
 
 
     flouble tol=0.0001;
     int iteration=0;
     flouble resi=tol+1;
-    flouble *resiCuda;
-    cudaMalloc(&resiCuda,sizeof(flouble));
+    flouble *resiCudaD0,*resiCudaD1;
+
+    cudaSetDevice(0);
+    cudaMalloc(&resiCudaD0,sizeof(flouble));
+    cudaSetDevice(1);
+    cudaMalloc(&resiCudaD1,sizeof(flouble));
+
     int step=100;  // 2 Iterations
     int maxDoubleIter=MAXITERATIONS/2;
 
@@ -98,13 +94,36 @@ return actualIteration;
     flouble valMainDiag=4/hsquare;
 
 
+
+
+
     while(iteration<maxDoubleIter) {
         // consecutive blocks
+        cudaSetDevice(0);
+        jacoboIteration_MultiGPU_CUDA <<<n/2+1,n>>>(cuda_actualIterationD0,cuda_lastIterSolD0,n,valSubDiag,valMainDiag,cuda_funD0);
+        cudaSetDevice(1);
+        jacoboIteration_MultiGPU_CUDA <<<n/2+1,n>>>(cuda_actualIterationD1,cuda_lastIterSolD1,n,valSubDiag,valMainDiag,cuda_funD1);
 
-        jacoboIteration_MultiGPU_CUDA <<<n,n>>>(cuda_actualIteration,cuda_lastIterSol,n,valSubDiag,valMainDiag,cudaF);
-        jacoboIteration_MultiGPU_CUDA <<<n,n>>>(cuda_lastIterSol,cuda_actualIteration,n,valSubDiag,valMainDiag,cudaF);
+        cudaSetDevice(0);
+        cudaMemcpy(actualIteration,&cuda_lastIterSolD0[m-2*n-1], sizeof(flouble)*n, cudaMemcpyDeviceToHost);
+        cudaSetDevice(1);
+        cudaMemcpy(cuda_lastIterSolD1,actualIteration, sizeof(flouble)*n, cudaMemcpyHostToDevice);
+        cudaMemcpy(actualIteration,&cuda_lastIterSolD1[n], sizeof(flouble)*n, cudaMemcpyDeviceToHost);
+        cudaSetDevice(0);
+        cudaMemcpy(&cuda_lastIterSolD0[m-n-1],actualIteration, sizeof(flouble)*n, cudaMemcpyHostToDevice);
+
+        // Swap
+        temp=cuda_actualIterationD0;
+        cuda_actualIterationD0=cuda_lastIterSolD0;
+        cuda_lastIterSolD0=temp;
+
+        temp=cuda_actualIterationD1;
+        cuda_actualIterationD1=cuda_lastIterSolD1;
+        cuda_lastIterSolD1=temp;
+
+
         iteration++;
-        if(iteration%step==0) {
+        if(false&&iteration%step==0) {
             calculateResidual_MultiGPU_CUDA <<<n,n>>>(cuda_actualIteration, cuda_lastIterSol, resiCuda);
             cudaMemcpy(&resi,resiCuda,sizeof(flouble),cudaMemcpyDeviceToHost);
 
@@ -118,11 +137,28 @@ return actualIteration;
     }
     std::cout << "Calculation finished after "<<2*iteration<<" Iterations.(%"<<step<<")"<<std::endl;
     *numberOfIterations=iteration*2;
-    cudaMemcpy(actualIteration,cuda_actualIteration, sizeof(flouble)*nn, cudaMemcpyDeviceToHost);
+
+   cudaSetDevice(0);
+   cudaMemcpy(actualIteration,cuda_lastIterSolD0,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
+   saveMyMatrix(actualIteration, n/2+1,n,1,3);
+
+   cudaSetDevice(1);
+   cudaMemcpy(actualIteration,cuda_lastIterSolD1,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
+   saveMyMatrix(actualIteration, n/2+1,n,1,4);
+
+
+ //   cudaMemcpy(actualIteration,cuda_actualIteration, sizeof(flouble)*nn, cudaMemcpyDeviceToHost);
 
     return actualIteration;
-*/
+
 }
+/*
+ *         cudaSetDevice(0);
+        jacoboIteration_MultiGPU_CUDA <<<n/2+1,n>>>(cuda_lastIterSolD0,cuda_actualIterationD0,n,valSubDiag,valMainDiag,cuda_funD0);
+        cudaSetDevice(1);
+        jacoboIteration_MultiGPU_CUDA <<<n/2+1,n>>>(cuda_lastIterSolD1,cuda_actualIterationD1,n,valSubDiag,valMainDiag,cuda_funD1);
+
+ */
 
 __global__ void initMatrixRightHandSideCuda_MultiGPU_CUDA(flouble h, flouble* matrix, int offset) {
     // Version for n==1024
