@@ -7,7 +7,7 @@ using namespace std;
 void aufg13b();
 flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIterations, flouble h);
 __global__ void initMatrixRightHandSideCuda_MultiGPU_CUDA(flouble h, flouble* matrix, int offset);
-__global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flouble valBoundary);
+__global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flouble valBoundary, int offset);
 __global__ void jacoboIteration_MultiGPU_CUDA(flouble *actualIteration, flouble *lastIterSol, int n, flouble valSubDiag,
                                      flouble valMainDiag, flouble *f);
 __global__ void calculateResidual_MultiGPU_CUDA(double *a, double *b, double *c);
@@ -61,19 +61,24 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
     cudaSetDevice(1);
     initMatrixRightHandSideCuda_MultiGPU_CUDA<<<n/2+1,n>>>(h,cuda_funD1,n/2);
 
-    cudaSetDevice(0);
-    cudaMemcpy(actualIteration,cuda_funD0,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
 
-    saveMyMatrix(actualIteration,n/2+1,n,1,3);
+
+    cudaSetDevice(0);
+    initSolutionVectors_MultiGPU_CUDA <<<n/2+1,n>>> (cuda_actualIterationD0, valBoundary,0);
+    cudaSetDevice(1);
+    initSolutionVectors_MultiGPU_CUDA <<<n/2+1,n>>> (cuda_actualIterationD1, valBoundary,n/2);
+
+    cudaSetDevice(0);
+    cudaMemcpy(actualIteration,cuda_actualIterationD0,sizeof(flouble)*m,cudaMemcpyHostToDevice);
+    saveMyMatrix(actualIteration, n/2+1,n,h,3);
 
     cudaSetDevice(1);
-    cudaMemcpy(actualIteration,cuda_funD1,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
+    cudaMemcpy(actualIteration,cuda_actualIterationD1,sizeof(flouble)*m,cudaMemcpyHostToDevice);
+    saveMyMatrix(actualIteration, n/2+1,n,h,4);
 
-    saveMyMatrix(actualIteration,n/2+1,n,1,4);
-    return actualIteration;
+return actualIteration;
+
 /*
-    initSolutionVectors_MultiGPU_CUDA <<<n,n>>> (cuda_actualIteration, valBoundary);
-
 
 
     flouble tol=0.0001;
@@ -126,18 +131,19 @@ __global__ void initMatrixRightHandSideCuda_MultiGPU_CUDA(flouble h, flouble* ma
 
 }
 
-__global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flouble valBoundary) {
+__global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flouble valBoundary, int offset) {
     int tid = threadIdx.x;
     int bid = blockIdx.x;
-    int n = blockDim.x;
+    int blocks = blockDim.x;
+    int blockId=bid+offset;
 
-    if ((bid == 0)||(bid == n-1)) {  // boundary values init (outer)
-        actualIteration[n * bid + tid] = valBoundary;
+    if ((blockId == 0)||(blockId == blocks-1)) {  // boundary values init (outer)
+        actualIteration[blocks * bid + tid] = valBoundary;
     } else {
         if((tid==0)||tid==n-1) {
-            actualIteration[n * bid + tid] = valBoundary;
+            actualIteration[blocks * bid + tid] = valBoundary;
         }else {
-            actualIteration[bid*n+tid] = 0;
+            actualIteration[bid*blocks+tid] = 0;
         }
     }
 }
