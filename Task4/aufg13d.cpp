@@ -6,7 +6,7 @@ using namespace std;
 
 void aufg13b();
 flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble *f, flouble valBoundary, int* numberOfIterations, flouble h);
-__global__ void initMatrixRightHandSideCuda_MultiGPU_CUDA(flouble h, flouble* matrix);
+__global__ void initMatrixRightHandSideCuda_MultiGPU_CUDA(flouble h, flouble* matrix, int offset);
 __global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flouble valBoundary);
 __global__ void jacoboIteration_MultiGPU_CUDA(flouble *actualIteration, flouble *lastIterSol, int n, flouble valSubDiag,
                                      flouble valMainDiag, flouble *f);
@@ -24,30 +24,51 @@ void aufg13d() {
 
     flouble boundaryValue=0;
     flouble *cuda_fun;
-    cudaMalloc(&cuda_fun,sizeof(flouble)*nn);
 
-    flouble *result=new flouble[nn];
+
+    flouble *result;
 
     int doneIterations=0;
 
-    initMatrixRightHandSideCuda_MultiGPU_CUDA<<<n,n>>>(h,cuda_fun);
+
     result=jacobiIterCuda_MultiGPU_CPU(n, cuda_fun, boundaryValue, &doneIterations,h);
     cudaThreadExit();
 
-    saveMyMatrix(result, n,n,h,1);
+   // saveMyMatrix(result, n,n,h,3);
 }
 
 flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble *cudaF, flouble valBoundary, int* numberOfIterations, flouble h) {
 
     int nn=n*n;
+    int m=(nn/2+n);
     flouble* actualIteration=new flouble[nn]();
 
 
-    flouble *cuda_actualIteration, *cuda_lastIterSol;
-    cudaMalloc(&cuda_actualIteration,sizeof(flouble)*nn);;
-    cudaMalloc(&cuda_lastIterSol,sizeof(flouble)*nn);;
+    flouble *cuda_actualIterationD0, *cuda_lastIterSolD0;
+    flouble *cuda_actualIterationD1, *cuda_lastIterSolD1;
+    cudaMalloc(&cuda_D0_actualIteration,sizeof(flouble)*m);
+    cudaMalloc(&cuda_D0_lastIterSol,sizeof(flouble)*m);
 
+    flouble *cuda_funD0,*cuda_funD1;
+
+    cudaMalloc(&cuda_funD0,sizeof(flouble)*m);
+    cudaMalloc(&cuda_funD1,sizeof(flouble)*m);
+
+    cudaSetDevice(0);
+    initMatrixRightHandSideCuda_MultiGPU_CUDA<<<n/2+1,n>>>(h,cuda_funD0,0);
+    cudaSetDevice(1);
+    initMatrixRightHandSideCuda_MultiGPU_CUDA<<<n/2+1,n>>>(h,cuda_funD1,n/2);
+
+
+    cudaMemcpy(actualIteration,cuda_funD0,cudaMemcpyDeviceToHost);
+
+    saveMyMatrix(result,n/2+1,n,h,3);
+
+    return actualIteration;
+/*
     initSolutionVectors_MultiGPU_CUDA <<<n,n>>> (cuda_actualIteration, valBoundary);
+
+
 
     flouble tol=0.0001;
     int iteration=0;
@@ -85,15 +106,15 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble *cudaF, flouble valBoundary,
     cudaMemcpy(actualIteration,cuda_actualIteration, sizeof(flouble)*nn, cudaMemcpyDeviceToHost);
 
     return actualIteration;
-
+*/
 }
 
-__global__ void initMatrixRightHandSideCuda_MultiGPU_CUDA(flouble h, flouble* matrix) {
+__global__ void initMatrixRightHandSideCuda_MultiGPU_CUDA(flouble h, flouble* matrix, int offset) {
     // Version for n==1024
     int tid=threadIdx.x;
     int bid=blockIdx.x;
 
-    flouble x=h*bid;
+    flouble x=h*(bid+offset);
     flouble y=h*tid;
     matrix[bid*blockDim.x+tid]=x*(1-x)+y*(1-y);
 
