@@ -7,7 +7,7 @@ using namespace std;
 void aufg13b();
 flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIterations, flouble h);
 __global__ void initMatrixRightHandSideCuda_MultiGPU_CUDA(flouble h, flouble* matrix, int offset);
-__global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flouble valBoundary, int offset);
+__global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flouble valBoundary, int n, int offset);
 __global__ void jacoboIteration_MultiGPU_CUDA(flouble *actualIteration, flouble *lastIterSol, int n, flouble valSubDiag,
                                      flouble valMainDiag, flouble *f);
 __global__ void calculateResidual_MultiGPU_CUDA(double *a, double *b, double *c);
@@ -64,9 +64,9 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
 
 
     cudaSetDevice(0);
-    initSolutionVectors_MultiGPU_CUDA <<<n/2+1,n>>> (cuda_actualIterationD0, valBoundary,0);
+    initSolutionVectors_MultiGPU_CUDA <<<n/2+1,n>>> (cuda_actualIterationD0, valBoundary,n,0);
     cudaSetDevice(1);
-    initSolutionVectors_MultiGPU_CUDA <<<n/2+1,n>>> (cuda_actualIterationD1, valBoundary,n/2);
+    initSolutionVectors_MultiGPU_CUDA <<<n/2+1,n>>> (cuda_actualIterationD1, valBoundary,n,n/2);
 
     cudaSetDevice(0);
     cudaMemcpy(actualIteration,cuda_actualIterationD0,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
@@ -131,20 +131,20 @@ __global__ void initMatrixRightHandSideCuda_MultiGPU_CUDA(flouble h, flouble* ma
 
 }
 
-__global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flouble valBoundary, int offset) {
+__global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flouble valBoundary, int n, int offset) {
     int tid = threadIdx.x;
     int bid = blockIdx.x;
     int threads= blockDim.x;
-    int blocks = gridDim.x;
     int blockId=bid+offset;
 
-    if ((blockId == 0)||(blockId == blocks-1)) {  // boundary values init (outer)
-        actualIteration[blocks * bid + tid] = valBoundary;
+
+    if ((blockId == 0)||(blockId == n-1)) {  // boundary values init (outer)
+        actualIteration[threads * bid + tid] = valBoundary;
     } else {
         if((tid==0)||tid==threads-1) {
-            actualIteration[blocks * bid + tid] = valBoundary;
+            actualIteration[threads * bid + tid] = valBoundary;
         }else {
-            actualIteration[bid*blocks+tid] = 0;
+            actualIteration[bid*threads+tid] = 0;
         }
     }
 }
