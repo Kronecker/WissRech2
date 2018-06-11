@@ -22,7 +22,7 @@ void aufg13d() {
     int nn=n*n;
     flouble h = 1./(n-1);
 
-    flouble boundaryValue=0;
+    flouble boundaryValue=2;
     flouble *cuda_fun;
 
 
