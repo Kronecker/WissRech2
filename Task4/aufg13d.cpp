@@ -134,13 +134,14 @@ __global__ void initMatrixRightHandSideCuda_MultiGPU_CUDA(flouble h, flouble* ma
 __global__ void initSolutionVectors_MultiGPU_CUDA(flouble *actualIteration, flouble valBoundary, int offset) {
     int tid = threadIdx.x;
     int bid = blockIdx.x;
-    int blocks = blockDim.x;
+    int threads= blockDim.x;
+    int blocks = gridDim.x;
     int blockId=bid+offset;
 
     if ((blockId == 0)||(blockId == blocks-1)) {  // boundary values init (outer)
         actualIteration[blocks * bid + tid] = valBoundary;
     } else {
-        if((tid==0)||tid==n-1) {
+        if((tid==0)||tid==threads-1) {
             actualIteration[blocks * bid + tid] = valBoundary;
         }else {
             actualIteration[bid*blocks+tid] = 0;
