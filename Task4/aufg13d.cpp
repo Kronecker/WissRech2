@@ -34,7 +34,7 @@ void aufg13d() {
     result=jacobiIterCuda_MultiGPU_CPU(n, boundaryValue, &doneIterations,h);
     cudaThreadExit();
 
-   // saveMyMatrix(result, n,n,h,3);
+    saveMyMatrix(result, n,n,1,3);
 }
 
 flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIterations, flouble h) {
@@ -147,11 +147,11 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
 
    cudaSetDevice(0);
    cudaMemcpy(actualIteration,cuda_lastIterSolD0,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
-   saveMyMatrix(actualIteration, n/2,n,1,3);
+ //  saveMyMatrix(actualIteration, n/2,n,1,3);
 
    cudaSetDevice(1);
-   cudaMemcpy(actualIteration,cuda_lastIterSolD1,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
-   saveMyMatrixAppend(&actualIteration[n],n/2,n,1,3,n/2);
+   cudaMemcpy(actualIteration[m],cuda_lastIterSolD1,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
+   //saveMyMatrixAppend(&actualIteration[n],n/2,n,1,3,n/2);
 
 
  //   cudaMemcpy(actualIteration,cuda_actualIteration, sizeof(flouble)*nn, cudaMemcpyDeviceToHost);
