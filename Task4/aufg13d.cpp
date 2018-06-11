@@ -104,13 +104,20 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
         cudaSetDevice(1);
         jacoboIteration_MultiGPU_CUDA <<<n/2+1,n>>>(cuda_actualIterationD1,cuda_lastIterSolD1,n,valSubDiag,valMainDiag,cuda_funD1);
 
-        cudaSetDevice(0);
-        cudaMemcpy(actualIteration,&cuda_lastIterSolD0[m-2*n], sizeof(flouble)*n, cudaMemcpyDeviceToHost);
-        cudaSetDevice(1);
-        cudaMemcpy(cuda_lastIterSolD1,actualIteration, sizeof(flouble)*n, cudaMemcpyHostToDevice);
-        cudaMemcpy(actualIteration,&cuda_lastIterSolD1[n], sizeof(flouble)*n, cudaMemcpyDeviceToHost);
-        cudaSetDevice(0);
-        cudaMemcpy(&cuda_lastIterSolD0[m-n],actualIteration, sizeof(flouble)*n, cudaMemcpyHostToDevice);
+//        cudaSetDevice(0);
+//        cudaMemcpy(actualIteration,&cuda_lastIterSolD0[m-2*n], sizeof(flouble)*n, cudaMemcpyDeviceToHost);
+//        cudaSetDevice(1);
+//        cudaMemcpy(cuda_lastIterSolD1,actualIteration, sizeof(flouble)*n, cudaMemcpyHostToDevice);
+//        cudaMemcpy(actualIteration,&cuda_lastIterSolD1[n], sizeof(flouble)*n, cudaMemcpyDeviceToHost);
+//        cudaSetDevice(0);
+//        cudaMemcpy(&cuda_lastIterSolD0[m-n],actualIteration, sizeof(flouble)*n, cudaMemcpyHostToDevice);
+
+          cudaSetDevice(0);
+          cudaMemcpy(cuda_lastIterSolD1,&cuda_lastIterSolD0[m-2*n], sizeof(flouble)*n, cudaMemcpyDeviceToDevice);
+          cudaSetDevice(1);
+          cudaMemcpy(cuda_lastIterSolD0[m-n],&cuda_lastIterSolD1[n], sizeof(flouble)*n, cudaMemcpyDeviceToDevice);
+
+
 
         // Swap
         temp=cuda_actualIterationD0;
