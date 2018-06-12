@@ -106,8 +106,8 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
 
 
 
-// MAXITERATIONS
-    while(iteration<2) {
+
+    while(iteration<MAXITERATIONS) {
         // consecutive blocks
         cudaSetDevice(0);
         jacoboIteration_MultiGPU_CUDA <<<n/2+1,n>>>(cuda_actualIterationD0,cuda_lastIterSolD0,n,valSubDiag,valMainDiag,cuda_funD0);
