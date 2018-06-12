@@ -129,9 +129,9 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
 //        cudaMemcpy(&cuda_actualIterationD1[m-n],actualIteration, sizeof(flouble)*n, cudaMemcpyHostToDevice);
 
           cudaSetDevice(0);
-          cudaMemcpy(cuda_actualIterationD1,&cuda_actualIterationD0[m-2*n], sizeof(flouble)*n, cudaMemcpyDeviceToDevice);
+         // cudaMemcpy(cuda_actualIterationD1,&cuda_actualIterationD0[m-2*n], sizeof(flouble)*n, cudaMemcpyDeviceToDevice);
           cudaSetDevice(1);
-          cudaMemcpy(&cuda_actualIterationD0[m-n],&cuda_actualIterationD1[n], sizeof(flouble)*n, cudaMemcpyDeviceToDevice);
+      //    cudaMemcpy(&cuda_actualIterationD0[m-n],&cuda_actualIterationD1[n], sizeof(flouble)*n, cudaMemcpyDeviceToDevice);
 
 
 
