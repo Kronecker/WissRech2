@@ -55,7 +55,7 @@ flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* num
     flouble* actualIteration=new flouble[nn]();
 
 
-    flouble *cuda_actualIteration, *cuda_lastIterSol;
+    flouble *cuda_actualIteration, *cuda_lastIterSol, temp;
     cudaMalloc(&cuda_actualIteration,sizeof(flouble)*nn);;
     cudaMalloc(&cuda_lastIterSol,sizeof(flouble)*nn);;
 
@@ -78,7 +78,10 @@ flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* num
         // consecutive blocks
 
         jacoboIteration_CUDA <<<n,n>>>(cuda_actualIteration,cuda_lastIterSol,n,valSubDiag,valMainDiag,cudaF);
-        jacoboIteration_CUDA <<<n,n>>>(cuda_lastIterSol,cuda_actualIteration,n,valSubDiag,valMainDiag,cudaF);
+        temp=cuda_actualIteration;
+        cuda_actualIteration=cuda_lastIterSol;
+        cuda_lastIterSol=temp;
+
         iteration++;
         if(false&iteration%step==0) {   // War nicht gefragt, und Häufigkeit kann Geschwindigkeitsvergleich beeinflussen
             calculateResidual_CUDA <<<n,n>>>(cuda_actualIteration, cuda_lastIterSol, resiCuda);
@@ -92,8 +95,8 @@ flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* num
             cudaMemcpy(resiCuda,&resi,sizeof(flouble),cudaMemcpyHostToDevice);
         }
     }
-    std::cout << "Calculation finished after "<<2*iteration<<" Iterations.(%"<<step<<")"<<std::endl;
-    *numberOfIterations=iteration*2;
+ //   std::cout << "Calculation finished after "<<2*iteration<<" Iterations.(%"<<step<<")"<<std::endl;
+    *numberOfIterations=iteration;
     cudaMemcpy(actualIteration,cuda_actualIteration, sizeof(flouble)*nn, cudaMemcpyDeviceToHost);
 
     return actualIteration;

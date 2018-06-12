@@ -29,7 +29,6 @@ void aufg13d() {
     flouble h = 1./(n-1);
 
     flouble boundaryValue=0;
-    flouble *cuda_fun;
 
 
     flouble *result;
@@ -162,7 +161,7 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
             cudaMemcpy(resiCuda,&resi,sizeof(flouble),cudaMemcpyHostToDevice);*/
         }
     }
-    std::cout << "Calculation finished after "<<iteration<<" Iterations.(%"<<step<<")"<<std::endl;
+  //  std::cout << "Calculation finished after "<<iteration<<" Iterations.(%"<<step<<")"<<std::endl;
     *numberOfIterations=iteration;
 
    cudaSetDevice(0);

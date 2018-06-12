@@ -85,7 +85,7 @@ flouble* jacobiIterCuda_1Core_CPU(int n, flouble *cudaF, flouble valBoundary, in
 
 
 
-    std::cout << "Calculation finished after "<<*numberOfIterations<<" Iterations."<<std::endl;
+ //   std::cout << "Calculation finished after "<<*numberOfIterations<<" Iterations."<<std::endl;
     cudaMemcpy(actualIteration,cuda_actualIteration, sizeof(flouble)*nn, cudaMemcpyDeviceToHost);
 
     return actualIteration;
