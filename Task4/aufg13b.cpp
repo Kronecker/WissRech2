@@ -55,7 +55,7 @@ flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* num
     flouble* actualIteration=new flouble[nn]();
 
 
-    flouble *cuda_actualIteration, *cuda_lastIterSol, temp;
+    flouble *cuda_actualIteration, *cuda_lastIterSol, *temp;
     cudaMalloc(&cuda_actualIteration,sizeof(flouble)*nn);;
     cudaMalloc(&cuda_lastIterSol,sizeof(flouble)*nn);;
 
