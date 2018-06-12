@@ -18,8 +18,7 @@ __global__ void calculateResidual_MultiGPU_CUDA(float *a, float *b, float *c);
 
 void aufg13d() {
     // Init Chrono
-    auto start = std::chrono::high_resolution_clock::now();
-    auto finish = std::chrono::high_resolution_clock::now();
+    high_resolution_clock::time_point start,finish ;
     std::chrono::duration<double> elapsed;
 
     start = std::chrono::high_resolution_clock::now();

@@ -11,8 +11,7 @@ flouble* jacobiIter(int n, flouble *f, flouble valBoundary, int* numberOfIterati
 
 void aufg13a() {
     // Init Chrono
-    auto start = std::chrono::high_resolution_clock::now();
-    auto finish = std::chrono::high_resolution_clock::now();
+    high_resolution_clock::time_point start,finish ;
     std::chrono::duration<double> elapsed;
 
 
