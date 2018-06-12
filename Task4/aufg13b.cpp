@@ -67,7 +67,7 @@ flouble* jacobiIterCuda_CPU(int n, flouble *cudaF, flouble valBoundary, int* num
     flouble *resiCuda;
     cudaMalloc(&resiCuda,sizeof(flouble));
     int step=100;  // 2 Iterations
-    int maxDoubleIter=MAXITERATIONS/2;
+    int maxDoubleIter=MAXITERATIONS;
 
     flouble hsquare=h*h;
     flouble valSubDiag=-1/hsquare;

@@ -73,14 +73,11 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
     initMatrixRightHandSideCuda_MultiGPU_CUDA<<<n/2+1,n>>>(h,cuda_funD0,0);
     cudaSetDevice(1);
     initMatrixRightHandSideCuda_MultiGPU_CUDA<<<n/2+1,n>>>(h,cuda_funD1,n/2-1);
-    cudaSetDevice(1);
-
 
     cudaSetDevice(0);
     initSolutionVectors_MultiGPU_CUDA <<<n/2+1,n>>> (cuda_lastIterSolD0, valBoundary,n,0);
     cudaSetDevice(1);
     initSolutionVectors_MultiGPU_CUDA <<<n/2+1,n>>> (cuda_lastIterSolD1, valBoundary,n,n/2-1);
-
 //    cudaSetDevice(0);
 //    cudaMemcpy(actualIteration,cuda_actualIterationD0,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
 //    saveMyMatrix(actualIteration, n/2+1,n,1,0);
@@ -124,12 +121,12 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
         jacoboIteration_MultiGPU_CUDA <<<n/2+1,n>>>(cuda_actualIterationD1,cuda_lastIterSolD1,n,valSubDiag,valMainDiag,cuda_funD1);
 
 //        cudaSetDevice(0);
-//        cudaMemcpy(actualIteration,&cuda_lastIterSolD0[m-2*n], sizeof(flouble)*n, cudaMemcpyDeviceToHost);
+//        cudaMemcpy(actualIteration,&cuda_actualIterationD0[m-2*n], sizeof(flouble)*n, cudaMemcpyDeviceToHost);
 //        cudaSetDevice(1);
-//        cudaMemcpy(cuda_lastIterSolD1,actualIteration, sizeof(flouble)*n, cudaMemcpyHostToDevice);
-//        cudaMemcpy(actualIteration,&cuda_lastIterSolD1[n], sizeof(flouble)*n, cudaMemcpyDeviceToHost);
+//        cudaMemcpy(cuda_actualIterationD1,actualIteration, sizeof(flouble)*n, cudaMemcpyHostToDevice);
+//        cudaMemcpy(actualIteration,&cuda_actualIterationD1[n], sizeof(flouble)*n, cudaMemcpyDeviceToHost);
 //        cudaSetDevice(0);
-//        cudaMemcpy(&cuda_lastIterSolD0[m-n],actualIteration, sizeof(flouble)*n, cudaMemcpyHostToDevice);
+//        cudaMemcpy(&cuda_actualIterationD1[m-n],actualIteration, sizeof(flouble)*n, cudaMemcpyHostToDevice);
 
           cudaSetDevice(0);
           cudaMemcpy(cuda_actualIterationD1,&cuda_actualIterationD0[m-2*n], sizeof(flouble)*n, cudaMemcpyDeviceToDevice);
