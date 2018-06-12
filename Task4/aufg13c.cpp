@@ -45,7 +45,7 @@ void aufg13c() {
     cout<< "Jacobi Iteration mit einer GPU(sinlgecore): "<< elapsed.count() * 1000 << "ms"<<endl;
 
     saveMyMatrix(result, n,n,h,2);
-
+delete(result);
 }
 
 

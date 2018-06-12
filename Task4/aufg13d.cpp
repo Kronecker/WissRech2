@@ -44,6 +44,7 @@ void aufg13d() {
     cout<< "Jacobi Iteration mit zwei GPU's(multicore): "<< elapsed.count() * 1000 << "ms"<<endl;
 
     saveMyMatrix(result, n,n,h,3);
+    delete(result);
 }
 
 flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIterations, flouble h) {
