@@ -139,7 +139,7 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
         cuda_actualIterationD1=cuda_lastIterSolD1;
         cuda_lastIterSolD1=temp;
 
-
+break;
         iteration++;
         if(false&&iteration%step==0) {
        /*     calculateResidual_MultiGPU_CUDA <<<n,n>>>(cuda_actualIteration, cuda_lastIterSol, resiCuda);
