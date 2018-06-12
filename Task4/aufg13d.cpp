@@ -17,6 +17,12 @@ __global__ void calculateResidual_MultiGPU_CUDA(float *a, float *b, float *c);
 
 
 void aufg13d() {
+    // Init Chrono
+    auto start = std::chrono::high_resolution_clock::now();
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed;
+
+    start = std::chrono::high_resolution_clock::now();
 
     int n=1024;
     int nn=n*n;
@@ -33,8 +39,12 @@ void aufg13d() {
 
     result=jacobiIterCuda_MultiGPU_CPU(n, boundaryValue, &doneIterations,h);
     cudaThreadExit();
+    finish = std::chrono::high_resolution_clock::now();
+    elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start);
 
-    saveMyMatrix(result, n,n,1,3);
+    cout<< "Jacobi Iteration mit zwei GPU's(multicore): "<< elapsed.count() * 1000 << "ms"<<endl;
+
+    saveMyMatrix(result, n,n,h,3);
 }
 
 flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIterations, flouble h) {

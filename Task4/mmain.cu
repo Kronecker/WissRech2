@@ -2,6 +2,8 @@
 #include <math.h>
 #include <fstream>
 #include <cuda.h>
+#include <chrono>
+
 
 //#define flouble float
 #define flouble double
@@ -14,9 +16,9 @@ void displayMyMatrix(flouble* matrix, int m,int n);
 void saveMyMatrix(flouble* matrix, int m,int n, flouble h, int numberTask);
 void saveMyMatrixAppend(flouble* matrix, int m,int n, flouble h, int numberTask, int offset);
 
-//#include "aufg13a.cpp"
-//#include "aufg13b.cpp"  // An include-disaster waiting to happen ....
-//#include "aufg13c.cpp"
+#include "aufg13a.cpp"
+#include "aufg13b.cpp"  // An include-disaster waiting to happen ....
+#include "aufg13c.cpp"
 #include "aufg13d.cpp"
 
 
@@ -26,16 +28,16 @@ void saveMyMatrixAppend(flouble* matrix, int m,int n, flouble h, int numberTask,
 
 int main() {
 
-    std::cout << "Hello, World!" << std::endl;
-   // aufg13a();
 
-    std::cout << "Hello, World!" << std::endl;
-  //  aufg13b();
+    aufg13a();
 
-    std::cout << "Hello, World!" << std::endl;
-//    aufg13c();
 
-    std::cout << "Hello, World!" << std::endl;
+    aufg13b();
+
+
+    aufg13c();
+
+
     aufg13d();
 
 

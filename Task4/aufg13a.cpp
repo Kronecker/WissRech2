@@ -10,6 +10,14 @@ flouble* jacobiIter(int n, flouble *f, flouble valBoundary, int* numberOfIterati
 
 
 void aufg13a() {
+    // Init Chrono
+    auto start = std::chrono::high_resolution_clock::now();
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed;
+
+
+
+    start = std::chrono::high_resolution_clock::now();
 
     int n=1024;
     flouble h = 1./(n-1);
@@ -23,8 +31,15 @@ void aufg13a() {
 
     fun=initMatrixRightHandSide(n,h);
     result=jacobiIter(n, fun, boundaryValue, &doneIterations,h);
+    cudaThreadExit();
 
+
+    finish = std::chrono::high_resolution_clock::now();
+    elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start);
+
+    cout<< "Jacobi Iteration mit CPU: "<< elapsed.count() * 1000 << "ms"<<endl;
     saveMyMatrix(result, n,n,h,0);
+    //cout << "Results saved to results_a.dat"<<endl;
 
     delete(fun);
     delete(result);
@@ -96,7 +111,7 @@ flouble* jacobiIter(int n, flouble *f, flouble valBoundary, int* numberOfIterati
 
 
     }
-    std::cout << "Calculation finished after "<<iteration<<" Iterations.(%"<<step<<")"<<std::endl;
+    //std::cout << "Calculation finished after "<<iteration<<" Iterations.(%"<<step<<")"<<std::endl;
     *numberOfIterations=iteration;
 
     delete(lastIterSol);

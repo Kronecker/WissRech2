@@ -15,6 +15,12 @@ __device__ void calculateResidual_1Core_CUDA(float *a, float *b, float *c, int n
 
 
 void aufg13c() {
+    // Init Chrono
+    auto start = std::chrono::high_resolution_clock::now();
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed;
+
+    start = std::chrono::high_resolution_clock::now();
 
     int n=1024;
     int nn=n*n;
@@ -32,6 +38,11 @@ void aufg13c() {
 
     result=jacobiIterCuda_1Core_CPU(n, cuda_fun, boundaryValue, &doneIterations,h);
     cudaThreadExit();
+
+    finish = std::chrono::high_resolution_clock::now();
+    elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start);
+
+    cout<< "Jacobi Iteration mit einer GPU(sinlgecore): "<< elapsed.count() * 1000 << "ms"<<endl;
 
     saveMyMatrix(result, n,n,h,2);
 
