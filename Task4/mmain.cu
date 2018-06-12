@@ -29,13 +29,13 @@ void saveMyMatrixAppend(flouble* matrix, int m,int n, flouble h, int numberTask,
 int main() {
 
 
-    aufg13a();
+ //   aufg13a();
 
 
     aufg13b();
 
 
-    aufg13c();
+  //  aufg13c();
 
 
     aufg13d();
