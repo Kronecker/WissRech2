@@ -95,7 +95,7 @@ flouble* jacobiIter(int n, flouble *f, flouble valBoundary, int* numberOfIterati
         }
 
 
-        if (!(iteration % step)) {
+        if (false&&!(iteration % step)) {// War nicht gefragt, und Häufigkeit kann Geschwindigkeitsvergleich beeinflussen
             resi=0;
             for(int i=0;i<n*n;i++) {
                 resi+=fabs(actualIteration[i]- lastIterSol[i]);

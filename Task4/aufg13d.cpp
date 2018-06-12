@@ -150,7 +150,7 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
 
 
         iteration++;
-        if(false&&iteration%step==0) {
+        if(false&&iteration%step==0) {// War nicht gefragt, und Häufigkeit kann Geschwindigkeitsvergleich beeinflussen
        /*     calculateResidual_MultiGPU_CUDA <<<n,n>>>(cuda_actualIteration, cuda_lastIterSol, resiCuda);
             cudaMemcpy(&resi,resiCuda,sizeof(flouble),cudaMemcpyDeviceToHost);
 

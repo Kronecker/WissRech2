@@ -160,7 +160,7 @@ __global__ void jacoboIteration_1Core_CUDA(flouble *actualIteration, flouble *la
         temp=lastIterSol;
         lastIterSol=actualIteration;
         actualIteration=temp;
-        if (*iteration % step == 0) {
+        if (false&&*iteration % step == 0) {// War nicht gefragt, und Häufigkeit kann Geschwindigkeitsvergleich beeinflussen
             calculateResidual_1Core_CUDA(actualIteration, lastIterSol, resi, n);
             if (*resi < tol) {
                 break;
