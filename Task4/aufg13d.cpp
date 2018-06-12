@@ -66,21 +66,21 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
     initMatrixRightHandSideCuda_MultiGPU_CUDA<<<n/2+1,n>>>(h,cuda_funD1,n/2-1);
     cudaSetDevice(1);
 
-    cudaSetDevice(0);
-    cudaMemcpy(actualIteration,cuda_funD0,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
-    saveMyMatrix(actualIteration, n/2+1,n,h,0);
-
-    cudaSetDevice(1);
-    cudaMemcpy(actualIteration,cuda_funD1,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
-    saveMyMatrixAppend(actualIteration, n/2+1,n,h,1,n/2-1);
-
-
-
 
     cudaSetDevice(0);
     initSolutionVectors_MultiGPU_CUDA <<<n/2+1,n>>> (cuda_actualIterationD0, valBoundary,n,0);
     cudaSetDevice(1);
     initSolutionVectors_MultiGPU_CUDA <<<n/2+1,n>>> (cuda_actualIterationD1, valBoundary,n,n/2-1);
+
+    cudaSetDevice(0);
+    cudaMemcpy(actualIteration,cuda_actualIterationD0,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
+    saveMyMatrix(actualIteration, n/2+1,n,1,0);
+
+    cudaSetDevice(1);
+    cudaMemcpy(actualIteration,cuda_actualIterationD1,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
+    saveMyMatrixAppend(actualIteration, n/2+1,n,1,1,n/2-1);
+
+
 
 //    cudaSetDevice(0);
 //    cudaMemcpy(actualIteration,cuda_actualIterationD0,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
@@ -161,7 +161,7 @@ flouble* jacobiIterCuda_MultiGPU_CPU(int n, flouble valBoundary, int* numberOfIt
  //  saveMyMatrix(actualIteration, n/2,n,1,3);
 
    cudaSetDevice(1);
-   cudaMemcpy(&actualIteration[m],cuda_lastIterSolD1,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
+   cudaMemcpy(&actualIteration[m-n],cuda_lastIterSolD1,sizeof(flouble)*m,cudaMemcpyDeviceToHost);
    //saveMyMatrixAppend(&actualIteration[n],n/2,n,1,3,n/2);
 
 
