@@ -16,7 +16,7 @@ __device__ void calculateResidual_1Core_CUDA(float *a, float *b, float *c, int n
 
 void aufg13c() {
     // Init Chrono
-    high_resolution_clock::time_point start,finish ;
+    std::high_resolution_clock::time_point start,finish ;
     std::chrono::duration<double> elapsed;
 
     start = std::chrono::high_resolution_clock::now();
