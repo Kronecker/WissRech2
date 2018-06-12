@@ -18,7 +18,7 @@ __global__ void calculateResidual_CUDA(float *a, float *b, float *c);
 
 void aufg13b() {
     // Init Chrono
-    std::high_resolution_clock::time_point start,finish ;
+    std::chrono::high_resolution_clock::time_point start,finish ;
     std::chrono::duration<double> elapsed;
 
     start = std::chrono::high_resolution_clock::now();
